@@ -9,50 +9,31 @@ void await_setup(int pipe) {
 }
 
 
-char* get_cgroup_name(int pid) {
+void get_cgroup_name(char *dest_str, int pid) {
     char group_prefix[] = "group_";
     char str_num[16];
 
     // convert int to string
     sprintf(str_num, "%d", pid);
-    char *group_name = str_concat(group_prefix, str_num);
+    char *group_name[] = {group_prefix, str_num};
 
-    printf("group_name -- %s\n", group_name);
-    return group_name;
+    str_array_concat(dest_str, group_name, 2);
+#ifdef DEBUG_MODE
+    printf("get_cgroup_name -- %s\n", dest_str);
+#endif
 }
 
 
-char* str_concat(char *str1, char *str2) {
-    unsigned long len_buffer = strlen(str1) + strlen(str2);
-    char *str = malloc(len_buffer + 1);
-
-    strcat(str, str1);
-    strcat(str, str2);
-
-    return str;
-}
-
-
-char* str_array_concat(char *strings[], int strings_size) {
-    unsigned long len_buffer = 0;
-
+void str_array_concat(char *dest_str, char *strings[], int strings_size) {
     for (int i = 0; i < strings_size; i++) {
-        len_buffer += strlen(strings[i]);
+        strcat(dest_str, strings[i]);
     }
-
-    char *str = malloc(len_buffer + 1);
-    for (int i = 0; i < strings_size; i++) {
-        strcat(str, strings[i]);
-    }
-
-    return str;
 }
 
 
 void create_dir(char* subsystem_path) {
     // 0700 meaning -- http://www.filepermissions.com/file-permission/0700
     // permission codes -- https://man7.org/linux/man-pages/man7/inode.7.html
-//    mode_t target_mode = 0777;
     mode_t target_mode = 0700;
     if (mkdir(subsystem_path, target_mode) == 0) {
         printf("Created a new directory -- %s\n", subsystem_path);
@@ -63,4 +44,16 @@ void create_dir(char* subsystem_path) {
         printf("Unable to create directory-- %s. Reason -- %s\n", subsystem_path, strerror(errno));
         exit(1);
     }
+}
+
+
+void write_file(char path[100], char line[100]) {
+    FILE *f = fopen(path, "w");
+
+    if (f == NULL)
+        kill_process("Failed to open file %s: %m\n", path);
+    if (fwrite(line, 1, strlen(line), f) < 0)
+        kill_process("Failed to write to file %s:\n", path);
+    if (fclose(f) != 0)
+        kill_process("Failed to close file %s: %m\n", path);
 }

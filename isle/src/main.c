@@ -71,7 +71,6 @@ int main(int argc, char **argv) {
 
     // set up cgroup
     config_cgroup_limits(child_pid);
-    rm_cgroup_dirs(child_pid);
 
     // Signal to the command process we're done with setup.
     if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE) {
@@ -85,8 +84,8 @@ int main(int argc, char **argv) {
         kill_process("Failed to wait pid %d: %m\n", child_pid);
     }
 
-    // TODO: rm dirs in cgroup subsystems
-//    rm_cgroup_dirs(child_pid);
+    // TODO: check if rm_cgroup_dirs works correct when we end process
+    rm_cgroup_dirs(child_pid);
 
     return 0;
 }

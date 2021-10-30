@@ -21,26 +21,13 @@ static void kill_process(const char *msg, ...) {
     exit(1);
 }
 
+void write_file(char path[100], char line[100]);
 
 void await_setup(int pipe);
 
+void get_cgroup_name(char *dest_str, int pid);
 
-static void write_file(char path[100], char line[100]) {
-    FILE *f = fopen(path, "w");
-
-    if (f == NULL)
-        kill_process("Failed to open file %s: %m\n", path);
-    if (fwrite(line, 1, strlen(line), f) < 0)
-        kill_process("Failed to write to file %s:\n", path);
-    if (fclose(f) != 0)
-        kill_process("Failed to close file %s: %m\n", path);
-}
-
-char* get_cgroup_name(int pid);
-
-char* str_concat(char *str1, char *str2);
-
-char* str_array_concat(char *strings[], int strings_siz);
+void str_array_concat(char *dest_str, char *strings[], int strings_size);
 
 void create_dir(char* subsystem_path);
 
