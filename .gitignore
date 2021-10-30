@@ -1,5 +1,5 @@
-namespaces/binary
-!namespaces/rootfs-alpine-stress/bin
+isle/binary
+!isle/rootfs-alpine-stress/bin
 
 ### C++ ###
 # Prerequisites

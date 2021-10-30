@@ -8,3 +8,9 @@
 ```shell
 stress --vm 8 --vm-bytes 1G
 ```
+
+### Examples of usage
+
+```shell
+UCU_OS_Course_Project/namespaces/binary$ sudo ./namespaces sh
+```
