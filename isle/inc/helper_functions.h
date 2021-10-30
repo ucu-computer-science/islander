@@ -36,9 +36,12 @@ static void write_file(char path[100], char line[100]) {
         kill_process("Failed to close file %s: %m\n", path);
 }
 
+char* get_cgroup_name(int pid);
 
 char* str_concat(char *str1, char *str2);
 
-char* str_array_concat(char *strings[], int strings_size);
+char* str_array_concat(char *strings[], int strings_siz);
+
+void create_dir(char* subsystem_path);
 
 #endif //NAMESPACES_HELPER_FUNCTIONS_H

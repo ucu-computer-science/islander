@@ -7,7 +7,6 @@
 
 static char cmd_stack[STACKSIZE];
 
-
 static int child_fn(void *arg) {
     // Kill the cmd process if the isolate process die.
     if (prctl(PR_SET_PDEATHSIG, SIGKILL))
@@ -38,6 +37,7 @@ static int child_fn(void *arg) {
 }
 
 
+//int main() {
 int main(int argc, char **argv) {
 //    int argc = 2;
 //    char **argv = {"./namespace", "sh"};
@@ -71,15 +71,22 @@ int main(int argc, char **argv) {
 
     // set up cgroup
     config_cgroup_limits(child_pid);
+    rm_cgroup_dirs(child_pid);
 
     // Signal to the command process we're done with setup.
-    if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE)
+    if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE) {
         kill_process("Failed to write to pipe: %m");
-    if (close(pipe))
+    }
+    if (close(pipe)) {
         kill_process("Failed to close pipe: %m");
+    }
 
-    if (waitpid(child_pid, NULL, 0) == -1)
+    if (waitpid(child_pid, NULL, 0) == -1) {
         kill_process("Failed to wait pid %d: %m\n", child_pid);
+    }
+
+    // TODO: rm dirs in cgroup subsystems
+//    rm_cgroup_dirs(child_pid);
 
     return 0;
 }

@@ -1,57 +1,98 @@
-//#include <sys/types.h>
+#define _XOPEN_SOURCE 500
 #include <sys/stat.h>
+#include <ftw.h>
+#include <stdio.h>
 
 #include "../inc/base_header.h"
 #include "../inc/cgroup_functions.h"
 
 
 void config_cgroup_limits(int pid) {
-    char group_prefix[] = "group";
-    char str_num[16];
-
-    // convert 123 to string [buf]
-    sprintf(str_num, "%d", pid);
-    char *group_name = str_concat(group_prefix, str_num);
-
-    // print our string
-    printf("group_name -- %s\n", group_name);
+    char *group_name = get_cgroup_name(pid);
 
     // set up memory limit
-    config_cgroup_subsystem("memory", group_name, "memory.limit_in_bytes", "150M", pid);
-
-    // TODO: rm dirs in cgroup subsystems
+    config_cgroup_subsystem("memory", group_name, "memory.limit_in_bytes", "1G", pid);
+//    free(group_name);
 }
 
 
 void config_cgroup_subsystem(char subsystem[], char group_name[], char subsystem_filename[],
                          char *limit_value, int pid) {
-    struct stat st = {0};
-
-    char *strings[] = {CGROUP_ROOT_PATH, subsystem, "/", group_name};
+    char *strings[] = {CGROUP_ROOT_PATH, subsystem, "/", PROGRAM_NAME};
     char *subsystem_path = str_array_concat(strings, 4);
-//    if (stat(subsystem_path, &st) == -1) {
-//        mkdir("~/new-my-dir", 0777);
-//        printf("Created a new directory -- %s\n", subsystem_path);
-//    }
+    create_dir(subsystem_path);
 
-    // 0700 meaning -- http://www.filepermissions.com/file-permission/0700
-    // permission codes -- https://man7.org/linux/man-pages/man7/inode.7.html
-//    int check = mkdir(subsystem_path,0777);
+    char *str_arr[] = {subsystem_path, "/", group_name};
+    char *program_subsystem_path = str_array_concat(str_arr, 3);
+    create_dir(program_subsystem_path);
 
-    // check if directory is created or not
-//    mode_t target_mode = 0777;
-    mode_t target_mode = 0700;
-    if (mkdir(subsystem_path, target_mode) == 0) {
-        // reason of using chmod -- https://stackoverflow.com/questions/39737609/why-cant-my-program-set-0777-mode-with-the-mkdir-system-call
-//        chmod(subsystem_path, target_mode);
-        printf("Created a new directory -- %s\n", subsystem_path);
-    } else {
-        printf("Unable to create directory-- %s. Reason -- %s\n", subsystem_path, strerror(errno));
-        exit(1);
-    }
-
+//    char slash[] = "/";
     char *string2 = str_concat("/", subsystem_filename);
-    char *subsystem_file_path = str_concat(subsystem_path, string2);
-    printf("subsystem_path -- %s\n", subsystem_file_path);
-//    write_file(subsystem_file_path, limit_value);
+
+//    char *subsystem_file_path = NULL;
+//    strcpy(subsystem_file_path, subsystem_path);
+//    strcat(subsystem_file_path, string2);
+    char* subsystem_file_path = str_concat(program_subsystem_path, string2);
+    printf("subsystem_file_path -- %s\n", subsystem_file_path);
+
+    // convert int to string
+    char str_num[16];
+    sprintf(str_num, "%d", pid);
+
+//    char *string3 = "/";
+//    strcat(string3, "tasks");
+    char *string3 = str_concat("/", "tasks");
+//    char *subsystem_tasks_path = NULL;
+//    strcpy(subsystem_tasks_path, subsystem_path);
+//    strcat(subsystem_path, string3);
+    char *subsystem_tasks_path = str_concat(program_subsystem_path, string3);
+
+    printf("program_subsystem_path2 -- %s\n", program_subsystem_path);
+    printf("string3 -- %s\n", string3);
+    printf("subsystem_file_path2 -- %s\n", subsystem_file_path);
+    printf("subsystem_tasks_path -- %s\n", subsystem_tasks_path);
+    write_file(subsystem_tasks_path, str_num);
+    write_file(subsystem_file_path, limit_value);
+
+    memset(string2, 0, strlen(string2));
+    memset(string3, 0, strlen(string3));
+    memset(program_subsystem_path, 0, strlen(program_subsystem_path));
+    memset(subsystem_path, 0, strlen(subsystem_path));
+    memset(subsystem_tasks_path, 0, strlen(subsystem_tasks_path));
+    memset(subsystem_file_path, 0, strlen(subsystem_file_path));
+}
+
+
+//int unlink_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
+//    int rv = remove(fpath);
+//
+//    if (rv)
+//        perror(fpath);
+//
+//    return rv;
+//}
+//
+//int rmrf(char *path) {
+//    return nftw(path, unlink_cb, 64, FTW_DEPTH | FTW_PHYS);
+//}
+
+
+void rm_cgroup_dirs(int pid) {
+    char *group_name = get_cgroup_name(pid);
+    rm_cgroup_dir("memory", group_name);
+    free(group_name);
+}
+
+
+void rm_cgroup_dir(char subsystem[], char group_name[]) {
+    printf("\n\n rm_cgroup_dir\n");
+    char *strings[] = {CGROUP_ROOT_PATH, subsystem, "/", PROGRAM_NAME, "/", group_name};
+    char *subsystem_path = str_array_concat(strings, 6);
+
+    if (rmdir(subsystem_path) == 0) {
+        printf("Deleted a directory -- %s\n", subsystem_path);
+    } else {
+        printf("Unable to delete directory-- %s. Reason -- %s\n", subsystem_path, strerror(errno));
+    }
+    free(subsystem_path);
 }
