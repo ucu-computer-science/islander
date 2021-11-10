@@ -1,4 +1,6 @@
+isle/ubuntu-rootfs
 isle/binary
+isle/build
 !isle/rootfs-alpine-stress/bin
 
 ### C++ ###

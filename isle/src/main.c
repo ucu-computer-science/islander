@@ -16,8 +16,8 @@ static int child_fn(void *arg) {
     // Wait for 'setup done' signal from the main process.
     await_setup(params->pipe_fd[PIPE_READ]);
 
-//    setup_mntns("../rootfs");
-    setup_mntns("../rootfs-alpine-stress");
+//    setup_mntns("../rootfs-alpine-stress");
+    setup_mntns("../ubuntu-rootfs");
 
     // Assuming, 0 in the current namespace maps to
     // a non-privileged UID in the parent namespace,
