@@ -13,7 +13,7 @@ static int child_fn(void *arg) {
     if (prctl(PR_SET_PDEATHSIG, SIGKILL))
         kill_process("cannot PR_SET_PDEATHSIG for child process: %m\n");
 
-    process_params *params = (process_params*) arg;
+    struct process_params *params = (struct process_params*) arg;
     // Wait for 'setup done' signal from the main process.
     await_setup(params->pipe_fd[PIPE_READ]);
 
@@ -28,8 +28,12 @@ static int child_fn(void *arg) {
 
     char **argv = params->argv;
     char *cmd = argv[0];
+//    cmd[strlen(cmd)] = '\0';
+    printf("child strlen(params->argv) -- %lu\n", sizeof(params->argv) / sizeof(char*));
+    printf("child strlen(cmd) -- %lu\n", strlen(cmd));
     printf("===========%s============\n", cmd);
 
+//    argv[1] = NULL;
     if (execvp(cmd, argv) == -1)
         kill_process("Failed to exec %s: %m\n", cmd);
 
@@ -60,11 +64,14 @@ int main(int argc, char **argv) {
 //    argv[7] = "8:0 10485760";
 
     // Set Process params such as: PIPE file descriptors and Command to execute.
-    process_params params;
+    struct process_params params;
     resource_limits res_limits;
-    memset(&params, 0, sizeof(process_params));
-    parse_args(argc, argv, &params, &res_limits);
+    memset(&params, 0, sizeof(struct process_params));
 
+    argv++;
+    params.argv = argv;
+//    parse_args(argc, argv, &params, &res_limits);
+    printf("params.argv[0] -- %s\n", params.argv[0]);
 
     // Create pipe to communicate between main and command process.
     if (pipe(params.pipe_fd) < 0)
@@ -89,7 +96,7 @@ int main(int argc, char **argv) {
     set_userns_mappings(child_pid);
 
     // set up cgroup
-    config_cgroup_limits(child_pid);
+//    config_cgroup_limits(child_pid, &res_limits);
 
     // Signal to the command process we're done with setup.
     if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE) {
@@ -104,7 +111,7 @@ int main(int argc, char **argv) {
     }
 
     // TODO: check if rm_cgroup_dirs works correct when we end process
-    rm_cgroup_dirs(child_pid);
+//    rm_cgroup_dirs(child_pid);
     free(params.argv);
 
     return 0;

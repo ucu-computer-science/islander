@@ -1,59 +1,34 @@
 #include "../inc/helper_functions.h"
 
 
-void read_limits(const process_params *params, resource_limits *res_limits) {
-    char* memory_in_bytes = "--memory-in-bytes";
-    char* cpu_quota = "--cpu-quota";
-    char* device_write_bps = "--device-write-bps";
-
-    for (int i = 0; i < params->argc; i++) {
-        if (strcmp(params->argv[i], memory_in_bytes) == 0) {
-            res_limits->memory_in_bytes = params->argv[i + 1];
-        } else if (strcmp(params->argv[i], cpu_quota) == 0) {
-            res_limits->cpu_quota = params->argv[i + 1];
-        } else if (strcmp(params->argv[i], device_write_bps) == 0) {
-            res_limits->device_write_bps = params->argv[i + 1];
-        }
-    }
-
-    printf("res_limits->memory_in_bytes -- %s\n", res_limits->memory_in_bytes);
-    printf("res_limits->cpu_quota -- %s\n", res_limits->cpu_quota);
-    printf("res_limits->device_write_bps -- %s\n", res_limits->device_write_bps);
-}
-
-
-void parse_args(int argc, char** argv, process_params *params, resource_limits *res_limits) {
+void parse_args(int argc, char** argv, struct process_params *params, resource_limits *res_limits) {
     // Skip binary path
 //    argc--; argv++;
     if (argc < 2) exit(0);
 
 //    char command_args[argc][COMMAND_SIZE];
-    char** command_args = calloc(argc, sizeof(char*));
-    char* memory_in_bytes = "--memory-in-bytes";
-    char* cpu_quota = "--cpu-quota";
-    char* device_write_bps = "--device-write-bps";
-    printf("argv[1] -- %s\n", argv[0]);
-
-    int arg_idx = 0;
-    for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "--memory-in-bytes") == 0) {
-            res_limits->memory_in_bytes = argv[i + 1];
-            i++;
-        } else if (strcmp(argv[i], cpu_quota) == 0) {
-            res_limits->cpu_quota = argv[i + 1];
-            i++;
-            printf("res_limits->cpu_quota -- %s\n", res_limits->cpu_quota);
-        } else if (strcmp(argv[i], device_write_bps) == 0) {
-            res_limits->device_write_bps = argv[i + 1];
-            i++;
-//            printf("res_limits->device_write_bps -- %s\n", res_limits->device_write_bps);
-        } else {
-//            printf("argv[i] -- %s\n", argv[i]);
-//            strcpy(command_args[arg_idx], argv[i]);
-            command_args[arg_idx] = argv[i];
-            arg_idx++;
-        }
-    }
+//    char** command_args = calloc(argc, sizeof(char*));
+//
+//    int arg_idx = 0;
+//    for (int i = 1; i < argc; i++) {
+//        if (strcmp(argv[i], "--memory-in-bytes") == 0) {
+//            res_limits->memory_in_bytes = argv[i + 1];
+//            i++;
+//        } else if (strcmp(argv[i], "--cpu-quota") == 0) {
+//            res_limits->cpu_quota = argv[i + 1];
+//            i++;
+//            printf("res_limits->cpu_quota -- %s\n", res_limits->cpu_quota);
+//        } else if (strcmp(argv[i], "--device-write-bps") == 0) {
+//            res_limits->device_write_bps = argv[i + 1];
+//            i++;
+////            printf("res_limits->device_write_bps -- %s\n", res_limits->device_write_bps);
+//        } else {
+////            strcpy(command_args[arg_idx], argv[i]);
+//            command_args[arg_idx] = argv[i];
+//            printf("command_args[arg_idx] -- %s\n", command_args[arg_idx]);
+//            arg_idx++;
+//        }
+//    }
 
 //    printf("res_limits->memory_in_bytes -- %s\n", res_limits->memory_in_bytes);
 //    printf("res_limits->cpu_quota -- %s\n", res_limits->cpu_quota);
@@ -61,8 +36,12 @@ void parse_args(int argc, char** argv, process_params *params, resource_limits *
 
 //    read_limits(&params, &res_limits);
 
-    params->argc = ++arg_idx;
-    params->argv = command_args;
+//    command_args[arg_idx++] = NULL;
+//    params->argc = arg_idx;
+    params->argc = --argc;
+//    params->argv = command_args;
+    argv++;
+    params->argv = argv;
 }
 
 

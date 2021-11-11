@@ -19,12 +19,13 @@
 
 #include "./defined_vars.h"
 
-typedef struct
+
+struct process_params
 {
     int pipe_fd[PIPE_FD_NUM];
     char **argv;
     int argc;
-} process_params;
+};
 
 typedef struct
 {

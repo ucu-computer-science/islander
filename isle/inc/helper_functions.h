@@ -26,7 +26,7 @@ static void kill_process(const char *msg, ...) {
 
 //void read_limits(const process_params *params, resource_limits *res_limits);
 
-void parse_args(int argc, char** argv, process_params *params, resource_limits *res_limits);
+void parse_args(int argc, char** argv, struct process_params *params, resource_limits *res_limits);
 //void parse_args(int argc, char **argv, process_params *params, resource_limits *res_limits);
 
 void write_file(char path[100], char line[100]);
