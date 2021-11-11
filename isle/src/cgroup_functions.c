@@ -16,7 +16,7 @@ void config_cgroup_limits(int pid) {
     config_cgroup_subsystem("memory", group_name, "memory.limit_in_bytes", "1G", pid);
     config_cgroup_subsystem("cpu", group_name, "cpu.cfs_quota_us", "100000", pid);
     config_cgroup_subsystem("blkio", group_name, "blkio.throttle.write_bps_device", "8:0 10485760", pid);
-    config_cgroup_subsystem("cpuset", group_name, "cpuset.cpus", "1", pid);
+//    config_cgroup_subsystem("cpuset", group_name, "cpuset.cpus", "1", pid);
 }
 
 
@@ -70,7 +70,7 @@ void rm_cgroup_dirs(int pid) {
     rm_cgroup_dir("memory", group_name);
     rm_cgroup_dir("cpu", group_name);
     rm_cgroup_dir("blkio", group_name);
-    rm_cgroup_dir("cpuset", group_name);
+//    rm_cgroup_dir("cpuset", group_name);
 }
 
 

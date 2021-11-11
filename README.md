@@ -10,6 +10,16 @@
 stress --vm 8 --vm-bytes 1G
 ```
 
+* block io measure
+```shell
+(base) root@denys-herasymuk-Strix-15-GL503GE:/# time bash -c "dd if=/home/writetest of=/home/writetest2 bs=64k count=3200 && rm /home/writetest2"
+3200+0 records in
+3200+0 records out
+real	0m 0.18s
+user	0m 0.00s
+sys	0m 0.17s
+```
+
 ### Examples of usage
 
 ```shell
