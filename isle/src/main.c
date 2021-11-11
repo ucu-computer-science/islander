@@ -1,5 +1,6 @@
 #include "../inc/base_header.h"
 #include "../inc/cgroup_functions.h"
+#include "../inc/helper_functions.h"
 
 #include "../inc/usernamespace.h"
 #include "../inc/mntnamespace.h"
@@ -12,7 +13,7 @@ static int child_fn(void *arg) {
     if (prctl(PR_SET_PDEATHSIG, SIGKILL))
         kill_process("cannot PR_SET_PDEATHSIG for child process: %m\n");
 
-    struct process_params *params = (struct process_params*) arg;
+    process_params *params = (process_params*) arg;
     // Wait for 'setup done' signal from the main process.
     await_setup(params->pipe_fd[PIPE_READ]);
 
@@ -37,15 +38,33 @@ static int child_fn(void *arg) {
 }
 
 
-//int main() {
 int main(int argc, char **argv) {
-//    int argc = 2;
+//int main() {
 //    char **argv = {"./namespace", "sh"};
+//    char **argv = {"./namespace\0", "sh\0", "--memory-in-bytes\0", "1G\0",
+//                   "--cpu-quota\0", "100000\0", "--device-write-bps\0", "8:0 10485760\0"}
+
+//    char argv[8][256] = {"./namespace", "sh", "--memory-in-bytes", "1G",
+//                   "--cpu-quota", "100000", "--device-write-bps", "8:0 10485760"};
+
+//    int argc = 8;
+//    int rows = argc;
+//    char **argv = calloc (rows,sizeof(char*));
+//    argv[0] = "./namespace";
+//    argv[1] = "sh";
+//    argv[2] = "--memory-in-bytes";
+//    argv[3] = "1G";
+//    argv[4] = "--cpu-quota";
+//    argv[5] = "100000";
+//    argv[6] = "--device-write-bps";
+//    argv[7] = "8:0 10485760";
 
     // Set Process params such as: PIPE file descriptors and Command to execute.
-    struct process_params params;
-    memset(&params, 0, sizeof(struct process_params));
-    parse_args(argc, argv, &params);
+    process_params params;
+    resource_limits res_limits;
+    memset(&params, 0, sizeof(process_params));
+    parse_args(argc, argv, &params, &res_limits);
+
 
     // Create pipe to communicate between main and command process.
     if (pipe(params.pipe_fd) < 0)
@@ -86,6 +105,7 @@ int main(int argc, char **argv) {
 
     // TODO: check if rm_cgroup_dirs works correct when we end process
     rm_cgroup_dirs(child_pid);
+    free(params.argv);
 
     return 0;
 }

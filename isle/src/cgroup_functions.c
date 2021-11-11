@@ -5,6 +5,7 @@
 
 #include "../inc/base_header.h"
 #include "../inc/cgroup_functions.h"
+#include "../inc/helper_functions.h"
 
 
 void config_cgroup_limits(int pid) {

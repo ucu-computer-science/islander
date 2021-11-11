@@ -8,9 +8,12 @@
 #include <unistd.h>
 #include <memory.h>
 
+#include "./base_header.h"
+
 #define PIPE_FD_NUM 2
 #define PIPE_OK_MSG "OK"
 #define PIPE_MSG_SIZE 2
+#define COMMAND_SIZE 256
 
 static void kill_process(const char *msg, ...) {
     va_list params;
@@ -20,6 +23,11 @@ static void kill_process(const char *msg, ...) {
     va_end(params);
     exit(1);
 }
+
+//void read_limits(const process_params *params, resource_limits *res_limits);
+
+void parse_args(int argc, char** argv, process_params *params, resource_limits *res_limits);
+//void parse_args(int argc, char **argv, process_params *params, resource_limits *res_limits);
 
 void write_file(char path[100], char line[100]);
 
