@@ -30,6 +30,8 @@ struct process_params
 typedef struct
 {
     char* memory_in_bytes;
+    char* cpu_shares;
+    char* cpu_period;
     char* cpu_quota;
     char* device_read_bps;
     char* device_write_bps;

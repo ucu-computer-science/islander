@@ -10,10 +10,10 @@
 ### Type of commands
 
 ```shell
-sudo ./namespaces sh
+sudo ./namespaces /bin/bash
 
 # in this case default limits will be used
-sudo ./namespaces sh --memory-in-bytes 1G --cpu-quota 100000 --device-write-bps 10485760
+sudo ./namespaces /bin/bash --memory-in-bytes 1G --cpu-quota 100000 --device-write-bps 10485760
 ```
 
 
@@ -23,7 +23,7 @@ Different rootfs tar.gz are located in isle/files dir, can be useful for testing
 
 **Check --memory-in-bytes and --cpu-quota flags**
 ```shell
-isle/build$ sudo ./namespaces /bin/bash --memory-in-bytes 1G --cpu-quota 10000 --device-write-bps 10485760
+isle/build$ sudo ./namespaces /bin/bash --memory-in-bytes 1G --cpu-quota 100000 --device-write-bps 10485760
 
 PID: 30106
 
@@ -46,7 +46,7 @@ stress: info: [32] dispatching hogs: 0 cpu, 0 io, 2 vm, 0 hdd
 
 
 ```shell
-isle/build$ sudo ./namespaces /bin/bash --memory-in-bytes 4G --cpu-quota 100000 --device-write-bps 10485760
+isle/build$ sudo ./namespaces /bin/bash --memory-in-bytes 4G --cpu-quota 1000000 --device-write-bps 10485760
 
 PID: 30106
 
