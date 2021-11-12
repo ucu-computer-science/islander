@@ -8,6 +8,13 @@
 #include "../inc/helper_functions.h"
 
 
+void set_up_default_limits(resource_limits *res_limits) {
+    res_limits->memory_in_bytes = "500M";
+    res_limits->cpu_quota = "10000";
+    res_limits->device_write_bps = "20971520";
+}
+
+
 void config_cgroup_limits(int pid, resource_limits *res_limits) {
     char group_name[64];
     group_name[0] = '\0';
