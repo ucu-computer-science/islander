@@ -87,6 +87,12 @@ stress: info: [32] dispatching hogs: 0 cpu, 0 io, 2 vm, 0 hdd
 
 **Check --device-read-bps flags**
 
+
+* Run this command to test --device-read-bps
+```shell
+sudo ./namespaces /bin/bash --device-read-bps 20975760
+```
+
 * Mount **/dev/** directory to our namespace with:
 ```shell
 mkdir ./ubuntu-rootfs/host_dev
@@ -106,6 +112,11 @@ dd iflag=direct if=/tmp/readtest of=/host_dev/null bs=64K count=1600
 
 
 **Check --device-write-bps flags**
+
+* Run this command to test --device-write-bps
+```shell
+sudo ./namespaces /bin/bash --device-write-bps 20975760
+```
 
 * Mount **/dev/** directory to our namespace with:
 ```shell
