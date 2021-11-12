@@ -1,11 +1,18 @@
 # UCU_OS_Course_Project
 
+## Description
 
-### Examples of usage
+iLander is a container engine, analog of Docker. Our container is called **isle** (pronunciation -- [il]), which is based on Linux namespaces and cgroup v1.
+
+
+## Examples of usage
+
+### Type of commands
 
 ```shell
-UCU_OS_Course_Project/namespaces/binary$ sudo ./namespaces sh
+sudo ./namespaces sh
 
+# in this case default limits will be used
 sudo ./namespaces sh --memory-in-bytes 1G --cpu-quota 100000 --device-write-bps 10485760
 ```
 
