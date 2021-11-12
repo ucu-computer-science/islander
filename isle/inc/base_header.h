@@ -17,21 +17,22 @@
 #include <syscall.h>
 #include <errno.h>
 
-#include "./helper_functions.h"
 #include "./defined_vars.h"
 
-struct process_params {
+
+struct process_params
+{
     int pipe_fd[PIPE_FD_NUM];
     char **argv;
+    int argc;
 };
 
+typedef struct
+{
+    char* memory_in_bytes;
+    char* cpu_quota;
+    char* device_write_bps;
+} resource_limits;
 
-static void parse_args(int argc, char **argv, struct process_params *params) {
-    // Skip binary path
-    argc--; argv++;
-    if (argc < 1) exit(0);
-
-    params->argv = argv;
-}
 
 #endif //NAMESPACES_BASE_HEADER_H

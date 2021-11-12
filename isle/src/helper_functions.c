@@ -1,4 +1,41 @@
-#include "../inc/base_header.h"
+#include "../inc/helper_functions.h"
+
+
+void parse_args(int argc, char** argv, struct process_params *params, resource_limits *res_limits) {
+    if (argc < 2) exit(0);
+
+    char** command_args = calloc(argc, sizeof(char*));
+
+    // Split argv on limits for cgroup and arguments for command,
+    // which will be executed via execvp()
+    int arg_idx = 0;
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--memory-in-bytes") == 0) {
+            res_limits->memory_in_bytes = argv[i + 1];
+            i++;
+        } else if (strcmp(argv[i], "--cpu-quota") == 0) {
+            res_limits->cpu_quota = argv[i + 1];
+            i++;
+        } else if (strcmp(argv[i], "--device-write-bps") == 0) {
+            res_limits->device_write_bps = argv[i + 1];
+            i++;
+        } else {
+            command_args[arg_idx] = argv[i];
+            arg_idx++;
+        }
+    }
+
+#ifdef DEBUG_MODE
+    printf("res_limits->memory_in_bytes -- %s\n", res_limits->memory_in_bytes);
+    printf("res_limits->cpu_quota -- %s\n", res_limits->cpu_quota);
+    printf("res_limits->device_write_bps -- %s\n", res_limits->device_write_bps);
+#endif
+
+    // Add NULL at the end since exec syscall take such format of argv
+    command_args[arg_idx++] = NULL;
+    params->argc = arg_idx;
+    params->argv = command_args;
+}
 
 
 void await_setup(int pipe) {

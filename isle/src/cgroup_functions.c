@@ -5,15 +5,33 @@
 
 #include "../inc/base_header.h"
 #include "../inc/cgroup_functions.h"
+#include "../inc/helper_functions.h"
 
 
-void config_cgroup_limits(int pid) {
+void set_up_default_limits(resource_limits *res_limits) {
+    // Default limits for cgroup
+    res_limits->memory_in_bytes = "500M";
+    res_limits->cpu_quota = "10000";
+    res_limits->device_write_bps = "20971520";
+}
+
+
+void config_cgroup_limits(int pid, resource_limits *res_limits) {
     char group_name[64];
     group_name[0] = '\0';
     get_cgroup_name(group_name, pid);
 
+    char *str_arr[] = {"8:0 ", res_limits->device_write_bps};
+    char write_bps_device_value[256];
+    write_bps_device_value[0] = '\0';
+    str_array_concat(write_bps_device_value, str_arr, 2);
+
     // set up memory limit
-    config_cgroup_subsystem("memory", group_name, "memory.limit_in_bytes", "1G", pid);
+    config_cgroup_subsystem("memory", group_name, "memory.limit_in_bytes", res_limits->memory_in_bytes, pid);
+    config_cgroup_subsystem("cpu", group_name, "cpu.cfs_quota_us", res_limits->cpu_quota, pid);
+    config_cgroup_subsystem("blkio", group_name, "blkio.throttle.write_bps_device", write_bps_device_value, pid);
+//    config_cgroup_subsystem("blkio", group_name, "blkio.throttle.write_bps_device", "8:0 10485760", pid);
+//    config_cgroup_subsystem("cpuset", group_name, "cpuset.cpus", "1", pid);
 }
 
 
@@ -65,6 +83,9 @@ void rm_cgroup_dirs(int pid) {
     group_name[0] = '\0';
     get_cgroup_name(group_name, pid);
     rm_cgroup_dir("memory", group_name);
+    rm_cgroup_dir("cpu", group_name);
+    rm_cgroup_dir("blkio", group_name);
+//    rm_cgroup_dir("cpuset", group_name);
 }
 
 
