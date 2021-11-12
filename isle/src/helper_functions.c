@@ -28,12 +28,12 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
         }
     }
 
-//#ifdef DEBUG_MODE
+#ifdef DEBUG_MODE
     printf("res_limits->memory_in_bytes -- %s\n", res_limits->memory_in_bytes);
     printf("res_limits->cpu_quota -- %s\n", res_limits->cpu_quota);
     printf("res_limits->device_read_bps -- %s\n", res_limits->device_read_bps);
     printf("res_limits->device_write_bps -- %s\n", res_limits->device_write_bps);
-//#endif
+#endif
 
     // Add NULL at the end since exec syscall take such format of argv
     command_args[arg_idx++] = NULL;
@@ -77,9 +77,13 @@ void create_dir(char* subsystem_path) {
     // permission codes -- https://man7.org/linux/man-pages/man7/inode.7.html
     mode_t target_mode = 0700;
     if (mkdir(subsystem_path, target_mode) == 0) {
+#ifdef DEBUG_MODE
         printf("Created a new directory -- %s\n", subsystem_path);
+#endif
     } else if (errno == 17) {
+#ifdef DEBUG_MODE
         printf("Directory already exists -- %s\n", subsystem_path);
+#endif
     } else {
         printf("errno -- %d\n", errno);
         printf("Unable to create directory-- %s. Reason -- %s\n", subsystem_path, strerror(errno));
