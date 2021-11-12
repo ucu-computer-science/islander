@@ -2,7 +2,7 @@
 
 ## Description
 
-iLander is a container engine, analog of Docker. Our container is called **isle** (pronunciation -- [il]), which is based on Linux namespaces and cgroup v1.
+**iLander** is a container engine, analog of Docker. Our container is called **isle** (pronunciation -- [il]), which is based on Linux namespaces and cgroup v1.
 
 
 ## Examples of usage
