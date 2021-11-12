@@ -32,9 +32,6 @@ void config_cgroup_limits(int pid, resource_limits *res_limits) {
     write_bps_device_value[0] = '\0';
     str_array_concat(write_bps_device_value, str_arr, 2);
 
-    printf("read_bps_device_value -- %s\n", read_bps_device_value);
-    printf("write_bps_device_value -- %s\n", write_bps_device_value);
-
     // set up memory limit
     config_cgroup_subsystem("memory", group_name, "memory.limit_in_bytes", res_limits->memory_in_bytes, pid);
     config_cgroup_subsystem("cpu", group_name, "cpu.cfs_quota_us", res_limits->cpu_quota, pid);
@@ -103,7 +100,9 @@ void rm_cgroup_dir(char subsystem[], char group_name[]) {
     str_array_concat(subsystem_path, str_arr, 6);
 
     if (rmdir(subsystem_path) == 0) {
+#ifdef DEBUG_MODE
         printf("Deleted a directory -- %s\n", subsystem_path);
+#endif
     } else {
         printf("Unable to delete directory-- %s. Reason -- %s\n", subsystem_path, strerror(errno));
     }
