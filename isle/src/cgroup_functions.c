@@ -11,7 +11,9 @@
 void set_up_default_limits(resource_limits *res_limits) {
     // Default limits for cgroup
     res_limits->memory_in_bytes = "500M";
-    res_limits->cpu_quota = "10000";
+    res_limits->cpu_shares = "100";
+    res_limits->cpu_quota = "100000";
+    res_limits->cpu_period = "1000000";
     res_limits->device_read_bps = "524288000";
     res_limits->device_write_bps = "104857600";
 }
@@ -34,6 +36,8 @@ void config_cgroup_limits(int pid, resource_limits *res_limits) {
 
     // set up memory limit
     config_cgroup_subsystem("memory", group_name, "memory.limit_in_bytes", res_limits->memory_in_bytes, pid);
+    config_cgroup_subsystem("cpu", group_name, "cpu.shares", res_limits->cpu_shares, pid);
+    config_cgroup_subsystem("cpu", group_name, "cpu.cfs_period_us", res_limits->cpu_period, pid);
     config_cgroup_subsystem("cpu", group_name, "cpu.cfs_quota_us", res_limits->cpu_quota, pid);
     config_cgroup_subsystem("blkio", group_name, "blkio.throttle.read_bps_device", read_bps_device_value, pid);
     config_cgroup_subsystem("blkio", group_name, "blkio.throttle.write_bps_device", write_bps_device_value, pid);

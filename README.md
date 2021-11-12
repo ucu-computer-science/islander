@@ -5,15 +5,29 @@
 **iLander** is a container engine, analog of Docker. Our container is called **isle** (pronunciation -- [il]), which is based on Linux namespaces and cgroup v1.
 
 
+### Description of limit options
+
+For more details we recommend to look in section 3 of RedHat documentation about cgroups "Subsystems and Tunable Parameters" [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/resource_management_guide/ch-subsystems_and_tunable_parameters).
+
+| Option [default]     | Description |
+| --------------- | ----------- |
+|   --memory-in-bytes [500M]   | Memory limit (format: `<number>`[`<unit>`]). Number is a positive integer. Unit can be one of b, k, m, or g. Minimum is 4M. |
+|   --cpu-shares [100]   | CPU shares (relative weight). For example, tasks in two cgroups that have cpu.shares set to 100 will receive equal CPU time, but tasks in a cgroup that has cpu.shares set to 200 receive twice the CPU time of tasks in a cgroup where cpu.shares is set to 100. The value specified in the cpu.shares file must be 2 or higher. |
+|   --cpu-period [100_000]   | Limit the CPU CFS (Completely Fair Scheduler) period.  If tasks in a cgroup should be able to access a single CPU for 0.2 seconds out of every 1 second, set cpu.cfs_quota_us to 200000 and cpu.cfs_period_us to 1000000. |
+|   --cpu-quota [1000_000]   | Limit the CPU CFS (Completely Fair Scheduler) quota. |
+|   --device-read-bps [500M]   | Limit read rate from the host filesystem (format: `<number>`[`<unit>`]). Number is a positive integer. Unit can be one of kb, mb, or gb. |
+|   --device-write-bps [100M]   | Limit write rate the host filesystem (format: `<number>`[`<unit>]`). Number is a positive integer. Unit can be one of kb, mb, or gb. |
+
+
 ## Examples of usage
 
 ### Type of commands
 
 ```shell
-sudo ./namespaces sh
+sudo ./namespaces /bin/bash
 
 # in this case default limits will be used
-sudo ./namespaces sh --memory-in-bytes 1G --cpu-quota 100000 --device-write-bps 10485760
+sudo ./namespaces /bin/bash --memory-in-bytes 1G --cpu-quota 100000 --device-write-bps 10485760
 ```
 
 
@@ -23,7 +37,7 @@ Different rootfs tar.gz are located in isle/files dir, can be useful for testing
 
 **Check --memory-in-bytes and --cpu-quota flags**
 ```shell
-isle/build$ sudo ./namespaces /bin/bash --memory-in-bytes 1G --cpu-quota 10000 --device-write-bps 10485760
+isle/build$ sudo ./namespaces /bin/bash --memory-in-bytes 1G --cpu-quota 100000 --device-write-bps 10485760
 
 PID: 30106
 
@@ -46,7 +60,7 @@ stress: info: [32] dispatching hogs: 0 cpu, 0 io, 2 vm, 0 hdd
 
 
 ```shell
-isle/build$ sudo ./namespaces /bin/bash --memory-in-bytes 4G --cpu-quota 100000 --device-write-bps 10485760
+isle/build$ sudo ./namespaces /bin/bash --memory-in-bytes 4G --cpu-quota 1000000 --device-write-bps 10485760
 
 PID: 30106
 
