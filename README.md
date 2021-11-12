@@ -24,4 +24,6 @@ sys	0m 0.17s
 
 ```shell
 UCU_OS_Course_Project/namespaces/binary$ sudo ./namespaces sh
+
+sudo ./namespaces sh --memory-in-bytes 1G --cpu-quota 100000 --device-write-bps 10485760
 ```

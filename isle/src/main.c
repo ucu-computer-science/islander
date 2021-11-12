@@ -28,14 +28,12 @@ static int child_fn(void *arg) {
 
     char **argv = params->argv;
     char *cmd = argv[0];
-//    cmd[strlen(cmd)] = '\0';
 #ifdef DEBUG_MODE
     printf("child strlen(params->argv) -- %lu\n", sizeof(params->argv) / sizeof(char*));
     printf("child strlen(cmd) -- %lu\n", strlen(cmd));
 #endif
     printf("===========%s============\n", cmd);
 
-//    argv[1] = NULL;
     if (execvp(cmd, argv) == -1)
         kill_process("Failed to exec %s: %m\n", cmd);
 
@@ -45,31 +43,13 @@ static int child_fn(void *arg) {
 
 
 int main(int argc, char **argv) {
-//int main() {
-//    char **argv = {"./namespace", "sh"};
-//    char **argv = {"./namespace\0", "sh\0", "--memory-in-bytes\0", "1G\0",
-//                   "--cpu-quota\0", "100000\0", "--device-write-bps\0", "8:0 10485760\0"}
-
-//    char argv[8][256] = {"./namespace", "sh", "--memory-in-bytes", "1G",
-//                   "--cpu-quota", "100000", "--device-write-bps", "8:0 10485760"};
-
-//    int argc = 8;
-//    int rows = argc;
-//    char **argv = calloc (rows,sizeof(char*));
-//    argv[0] = "./namespace";
-//    argv[1] = "sh";
-//    argv[2] = "--memory-in-bytes";
-//    argv[3] = "1G";
-//    argv[4] = "--cpu-quota";
-//    argv[5] = "100000";
-//    argv[6] = "--device-write-bps";
-//    argv[7] = "8:0 10485760";
-
     // Set Process params such as: PIPE file descriptors and Command to execute.
     struct process_params params;
+    memset(&params, 0, sizeof(struct process_params));
+
+    // Set default limits for cgroup
     resource_limits res_limits;
     set_up_default_limits(&res_limits);
-    memset(&params, 0, sizeof(struct process_params));
 
     parse_args(argc, argv, &params, &res_limits);
 

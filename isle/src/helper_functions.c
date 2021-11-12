@@ -2,13 +2,12 @@
 
 
 void parse_args(int argc, char** argv, struct process_params *params, resource_limits *res_limits) {
-    // Skip binary path
-//    argc--; argv++;
     if (argc < 2) exit(0);
 
-//    char command_args[argc][COMMAND_SIZE];
     char** command_args = calloc(argc, sizeof(char*));
 
+    // Split argv on limits for cgroup and arguments for command,
+    // which will be executed via execvp()
     int arg_idx = 0;
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--memory-in-bytes") == 0) {
@@ -20,27 +19,22 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
         } else if (strcmp(argv[i], "--device-write-bps") == 0) {
             res_limits->device_write_bps = argv[i + 1];
             i++;
-//            printf("res_limits->device_write_bps -- %s\n", res_limits->device_write_bps);
         } else {
-//            strcpy(command_args[arg_idx], argv[i]);
             command_args[arg_idx] = argv[i];
-            printf("command_args[arg_idx] -- %s\n", command_args[arg_idx]);
             arg_idx++;
         }
     }
 
+#ifdef DEBUG_MODE
     printf("res_limits->memory_in_bytes -- %s\n", res_limits->memory_in_bytes);
     printf("res_limits->cpu_quota -- %s\n", res_limits->cpu_quota);
     printf("res_limits->device_write_bps -- %s\n", res_limits->device_write_bps);
+#endif
 
-//    read_limits(&params, &res_limits);
-
+    // Add NULL at the end since exec syscall take such format of argv
     command_args[arg_idx++] = NULL;
     params->argc = arg_idx;
     params->argv = command_args;
-//    params->argc = --argc;
-//    argv++;
-//    params->argv = argv;
 }
 
 

@@ -9,6 +9,7 @@
 
 
 void set_up_default_limits(resource_limits *res_limits) {
+    // Default limits for cgroup
     res_limits->memory_in_bytes = "500M";
     res_limits->cpu_quota = "10000";
     res_limits->device_write_bps = "20971520";
