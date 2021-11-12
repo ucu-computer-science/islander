@@ -35,6 +35,8 @@ sudo ./namespaces sh --memory-in-bytes 1G --cpu-quota 100000 --device-write-bps 
 
 ### Test examples
 
+Different rootfs tar.gz are located in isle/files dir, can be useful for testing.
+
 **Check --memory-in-bytes and --cpu-quota flags**
 ```shell
 isle/build$ sudo ./namespaces sh --memory-in-bytes 1G --cpu-quota 10000 --device-write-bps 10485760
