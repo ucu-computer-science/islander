@@ -1,0 +1,44 @@
+Package: publicsuffix
+Architecture: amd64
+Auto-Installed: 1
+
+Package: openssl
+Architecture: amd64
+Auto-Installed: 1
+
+Package: libpsl5
+Architecture: amd64
+Auto-Installed: 1
+
+Package: ca-certificates
+Architecture: amd64
+Auto-Installed: 1
+
+Package: libssl1.1
+Architecture: amd64
+Auto-Installed: 1
+
+Package: libsctp1
+Architecture: amd64
+Auto-Installed: 1
+
+Package: libbsd0
+Architecture: amd64
+Auto-Installed: 1
+
+Package: libaio1
+Architecture: amd64
+Auto-Installed: 1
+
+Package: libapparmor1
+Architecture: amd64
+Auto-Installed: 1
+
+Package: libjudydebian1
+Architecture: amd64
+Auto-Installed: 1
+
+Package: libipsec-mb0
+Architecture: amd64
+Auto-Installed: 1
+

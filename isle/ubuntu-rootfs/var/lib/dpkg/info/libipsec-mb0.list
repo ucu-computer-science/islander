@@ -1,0 +1,13 @@
+/.
+/usr
+/usr/lib
+/usr/lib/x86_64-linux-gnu
+/usr/lib/x86_64-linux-gnu/libIPSec_MB.so.0.53.0
+/usr/share
+/usr/share/doc
+/usr/share/doc/libipsec-mb0
+/usr/share/doc/libipsec-mb0/LICENSE
+/usr/share/doc/libipsec-mb0/README.gz
+/usr/share/doc/libipsec-mb0/changelog.Debian.gz
+/usr/share/doc/libipsec-mb0/copyright
+/usr/lib/x86_64-linux-gnu/libIPSec_MB.so.0

@@ -1,0 +1,11 @@
+/.
+/usr
+/usr/lib
+/usr/lib/x86_64-linux-gnu
+/usr/lib/x86_64-linux-gnu/libsctp.so.1.0.18
+/usr/share
+/usr/share/doc
+/usr/share/doc/libsctp1
+/usr/share/doc/libsctp1/changelog.Debian.gz
+/usr/share/doc/libsctp1/copyright
+/usr/lib/x86_64-linux-gnu/libsctp.so.1
