@@ -12,7 +12,8 @@ void set_up_default_limits(resource_limits *res_limits) {
     // Default limits for cgroup
     res_limits->memory_in_bytes = "500M";
     res_limits->cpu_quota = "10000";
-    res_limits->device_write_bps = "20971520";
+    res_limits->device_read_bps = "524288000";
+    res_limits->device_write_bps = "104857600";
 }
 
 
@@ -21,17 +22,24 @@ void config_cgroup_limits(int pid, resource_limits *res_limits) {
     group_name[0] = '\0';
     get_cgroup_name(group_name, pid);
 
+    char *str_arr2[] = {"8:0 ", res_limits->device_read_bps};
+    char read_bps_device_value[256];
+    read_bps_device_value[0] = '\0';
+    str_array_concat(read_bps_device_value, str_arr2, 2);
+
     char *str_arr[] = {"8:0 ", res_limits->device_write_bps};
     char write_bps_device_value[256];
     write_bps_device_value[0] = '\0';
     str_array_concat(write_bps_device_value, str_arr, 2);
 
+    printf("read_bps_device_value -- %s\n", read_bps_device_value);
+    printf("write_bps_device_value -- %s\n", write_bps_device_value);
+
     // set up memory limit
     config_cgroup_subsystem("memory", group_name, "memory.limit_in_bytes", res_limits->memory_in_bytes, pid);
     config_cgroup_subsystem("cpu", group_name, "cpu.cfs_quota_us", res_limits->cpu_quota, pid);
+    config_cgroup_subsystem("blkio", group_name, "blkio.throttle.read_bps_device", read_bps_device_value, pid);
     config_cgroup_subsystem("blkio", group_name, "blkio.throttle.write_bps_device", write_bps_device_value, pid);
-//    config_cgroup_subsystem("blkio", group_name, "blkio.throttle.write_bps_device", "8:0 10485760", pid);
-//    config_cgroup_subsystem("cpuset", group_name, "cpuset.cpus", "1", pid);
 }
 
 
@@ -85,7 +93,6 @@ void rm_cgroup_dirs(int pid) {
     rm_cgroup_dir("memory", group_name);
     rm_cgroup_dir("cpu", group_name);
     rm_cgroup_dir("blkio", group_name);
-//    rm_cgroup_dir("cpuset", group_name);
 }
 
 

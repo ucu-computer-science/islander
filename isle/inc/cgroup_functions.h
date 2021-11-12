@@ -2,7 +2,7 @@
 #define NAMESPACES_CGROUP_FUNCTIONS_H
 
 #define CGROUP_ROOT_PATH "/sys/fs/cgroup/"
-#define PROGRAM_NAME "islenet"
+#define PROGRAM_NAME "ilander"
 
 
 void set_up_default_limits(resource_limits *res_limits);

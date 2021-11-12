@@ -17,8 +17,7 @@ static int child_fn(void *arg) {
     // Wait for 'setup done' signal from the main process.
     await_setup(params->pipe_fd[PIPE_READ]);
 
-    setup_mntns("../rootfs-alpine-stress");
-//    setup_mntns("../ubuntu-rootfs");
+    setup_mntns("../ubuntu-rootfs");
 
     // Assuming, 0 in the current namespace maps to
     // a non-privileged UID in the parent namespace,
@@ -32,7 +31,7 @@ static int child_fn(void *arg) {
     printf("child strlen(params->argv) -- %lu\n", sizeof(params->argv) / sizeof(char*));
     printf("child strlen(cmd) -- %lu\n", strlen(cmd));
 #endif
-    printf("===========%s============\n", cmd);
+    printf("\n\n=========== %s ============\n", cmd);
 
     if (execvp(cmd, argv) == -1)
         kill_process("Failed to exec %s: %m\n", cmd);
@@ -90,9 +89,7 @@ int main(int argc, char **argv) {
         kill_process("Failed to wait pid %d: %m\n", child_pid);
     }
 
-    // TODO: check if rm_cgroup_dirs works correct when we end process
     rm_cgroup_dirs(child_pid);
     free(params.argv);
-
     return 0;
 }

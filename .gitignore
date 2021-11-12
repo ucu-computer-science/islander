@@ -1,9 +1,18 @@
-isle/ubuntu-rootfs
+#isle/ubuntu-rootfs
 isle/binary
 isle/build
+
+isle/rootfs-alpine-stress
 isle/rootfs-alpine-stress/home/writetest
 isle/rootfs-alpine-stress/tmp/writetest
-!isle/rootfs-alpine-stress/bin
+isle/rootfs-alpine-stress/bin
+
+isle/ubuntu-rootfs
+isle/ubuntu-rootfs/home/writetest
+isle/ubuntu-rootfs/tmp/writetest
+isle/ubuntu-rootfs/home/readtest
+isle/ubuntu-rootfs/tmp/readtest
+
 
 ### C++ ###
 # Prerequisites

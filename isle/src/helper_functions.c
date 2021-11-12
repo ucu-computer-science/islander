@@ -16,6 +16,9 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
         } else if (strcmp(argv[i], "--cpu-quota") == 0) {
             res_limits->cpu_quota = argv[i + 1];
             i++;
+        } else if (strcmp(argv[i], "--device-read-bps") == 0) {
+            res_limits->device_read_bps = argv[i + 1];
+            i++;
         } else if (strcmp(argv[i], "--device-write-bps") == 0) {
             res_limits->device_write_bps = argv[i + 1];
             i++;
@@ -25,11 +28,12 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
         }
     }
 
-#ifdef DEBUG_MODE
+//#ifdef DEBUG_MODE
     printf("res_limits->memory_in_bytes -- %s\n", res_limits->memory_in_bytes);
     printf("res_limits->cpu_quota -- %s\n", res_limits->cpu_quota);
+    printf("res_limits->device_read_bps -- %s\n", res_limits->device_read_bps);
     printf("res_limits->device_write_bps -- %s\n", res_limits->device_write_bps);
-#endif
+//#endif
 
     // Add NULL at the end since exec syscall take such format of argv
     command_args[arg_idx++] = NULL;
