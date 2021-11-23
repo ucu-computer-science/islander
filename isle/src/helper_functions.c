@@ -1,4 +1,5 @@
 #include "../inc/helper_functions.h"
+#include "../inc/manage_data.h"
 
 
 void parse_args(int argc, char** argv, struct process_params *params, resource_limits *res_limits) {
@@ -47,6 +48,13 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
     command_args[arg_idx++] = NULL;
     params->argc = arg_idx;
     params->argv = command_args;
+}
+
+
+void enable_features(int isle_pid) {
+    char* src_dir_path = "/dev/";
+    char* dest_dir_path = "../ubuntu-rootfs/host_dev/";
+    mount_dir(isle_pid, src_dir_path, dest_dir_path);
 }
 
 

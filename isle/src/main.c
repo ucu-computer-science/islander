@@ -18,7 +18,7 @@ static int child_fn(void *arg) {
     // Wait for 'setup done' signal from the main process.
     await_setup(params->pipe_fd[PIPE_READ]);
 
-    setup_mntns("../ubuntu-rootfs");
+    setup_mntns(SRC_ROOTFS_PATH);
 
     // Assuming, 0 in the current namespace maps to
     // a non-privileged UID in the parent namespace,
@@ -79,7 +79,6 @@ int main(int argc, char **argv) {
     config_cgroup_limits(child_pid, &res_limits);
 
 //    if (params.is_mount)
-    mount_dir();
 
     // Signal to the command process we're done with setup.
     if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE) {
@@ -88,6 +87,9 @@ int main(int argc, char **argv) {
     if (close(pipe)) {
         kill_process("Failed to close pipe: %m");
     }
+//
+//    sleep(2);
+//    enable_features(child_pid);
 
     if (waitpid(child_pid, NULL, 0) == -1) {
         kill_process("Failed to wait pid %d: %m\n", child_pid);

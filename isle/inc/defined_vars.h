@@ -11,6 +11,9 @@
 #define PIPE_OK_MSG "OK"
 #define PIPE_MSG_SIZE 2
 
+#define SRC_ROOTFS_PATH "../ubuntu-rootfs"
+#define NSENTER_MNT_ARGS 7
+
 // error codes
 #define SUCCESS 0
 #define OPEN_FILE_ERR -2
