@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
     }
 //
 //    sleep(2);
-//    enable_features(child_pid);
+    enable_features(child_pid);
 
     if (waitpid(child_pid, NULL, 0) == -1) {
         kill_process("Failed to wait pid %d: %m\n", child_pid);
