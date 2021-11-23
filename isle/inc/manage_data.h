@@ -1,0 +1,6 @@
+#ifndef NAMESPACES_MANAGE_DATA_H
+#define NAMESPACES_MANAGE_DATA_H
+
+void mount_dir();
+
+#endif //NAMESPACES_MANAGE_DATA_H

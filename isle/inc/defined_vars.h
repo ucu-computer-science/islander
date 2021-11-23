@@ -13,12 +13,12 @@
 
 // error codes
 #define SUCCESS 0
-#define FUNC_FAILED -1
 #define OPEN_FILE_ERR -2
 #define READ_FILE_ERR -3
 #define WRITE_FILE_ERR -4
 #define ERROR_INPUT -5
 #define INVALID_ARG -6
+#define MOUNT_FAIL -7
 
 #define STDOUT_DESC 1
 #define ERROR_DESC 2

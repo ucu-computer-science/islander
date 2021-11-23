@@ -1,6 +1,7 @@
 #include "../inc/base_header.h"
 #include "../inc/cgroup_functions.h"
 #include "../inc/helper_functions.h"
+#include "../inc/manage_data.h"
 
 #include "../inc/usernamespace.h"
 #include "../inc/mntnamespace.h"
@@ -71,11 +72,14 @@ int main(int argc, char **argv) {
     // Get the writable end of the pipe.
     int pipe = params.pipe_fd[PIPE_WRITE];
 
-    // Set proper namespace mappings to give the ROOT privillages to child process.
+    // Set proper namespace mappings to give the ROOT privileges to child process.
     set_userns_mappings(child_pid);
 
-    // set up cgroup
+    // set up cgroup limits
     config_cgroup_limits(child_pid, &res_limits);
+
+//    if (params.is_mount)
+    mount_dir();
 
     // Signal to the command process we're done with setup.
     if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE) {
