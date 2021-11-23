@@ -54,7 +54,7 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
 void enable_features(int isle_pid) {
     char* src_dir_path = "/dev/";
     char* dest_dir_path = "../ubuntu-rootfs/host_dev/";
-    mount_dir(isle_pid, src_dir_path, dest_dir_path);
+    mount_ns_dir(isle_pid, src_dir_path, dest_dir_path);
 }
 
 

@@ -95,6 +95,9 @@ int main(int argc, char **argv) {
         kill_process("Failed to wait pid %d: %m\n", child_pid);
     }
 
+    char* dest_dir_path = "../ubuntu-rootfs/host_dev/";
+    unmount_ns_dir(child_pid, dest_dir_path);
+
     rm_cgroup_dirs(child_pid);
     free(params.argv);
     return 0;

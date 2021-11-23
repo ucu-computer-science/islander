@@ -13,6 +13,7 @@
 
 #define SRC_ROOTFS_PATH "../ubuntu-rootfs"
 #define NSENTER_MNT_ARGS 7
+#define NSENTER_UNMNT_ARGS 6
 
 // error codes
 #define SUCCESS 0
@@ -22,6 +23,7 @@
 #define ERROR_INPUT -5
 #define INVALID_ARG -6
 #define MOUNT_FAIL -7
+#define UMOUNT_FAIL -8
 
 #define STDOUT_DESC 1
 #define ERROR_DESC 2
