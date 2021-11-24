@@ -16,6 +16,7 @@
 #include <memory.h>
 #include <syscall.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #include "./defined_vars.h"
 
@@ -25,6 +26,10 @@ struct process_params
     int pipe_fd[PIPE_FD_NUM];
     char **argv;
     int argc;
+    bool is_mount;
+    char **mnt_src;
+    char **mnt_dst;
+    int mnt_num;
 };
 
 typedef struct

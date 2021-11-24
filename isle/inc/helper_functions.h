@@ -26,7 +26,9 @@ static void kill_process(const char *msg, ...) {
 
 void parse_args(int argc, char** argv, struct process_params *params, resource_limits *res_limits);
 
-void enable_features(int isle_pid);
+void enable_features(int isle_pid, struct process_params *params);
+
+void release_resources(int isle_pid, struct process_params *params);
 
 void write_file(char path[100], char line[100]);
 

@@ -1,15 +1,21 @@
 #include "../inc/helper_functions.h"
 #include "../inc/manage_data.h"
+#include "../inc/cgroup_functions.h"
 
+#define MNT_FREQUENCY 5.0
 
 void parse_args(int argc, char** argv, struct process_params *params, resource_limits *res_limits) {
     if (argc < 2) exit(0);
 
     char** command_args = calloc(argc, sizeof(char*));
+    params->mnt_src = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
+    params->mnt_dst = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
 
     // Split argv on limits for cgroup and arguments for command,
     // which will be executed via execvp()
     int arg_idx = 0;
+    int mnt_src_idx = 0;
+    int mnt_dst_idx = 0;
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--memory-in-bytes") == 0) {
             res_limits->memory_in_bytes = argv[i + 1];
@@ -29,11 +35,21 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
         } else if (strcmp(argv[i], "--device-write-bps") == 0) {
             res_limits->device_write_bps = argv[i + 1];
             i++;
+
+        // mount feature
+        } else if (strcmp(argv[i], "--mount") == 0) {
+            params->is_mount = true;
+            params->mnt_src[mnt_src_idx++] = argv[i + 2];
+            params->mnt_dst[mnt_dst_idx++] = argv[i + 4];
+            printf("parse_args: src -- %s, dest -- %s\n", params->mnt_src[mnt_src_idx - 1],  params->mnt_dst[mnt_dst_idx - 1]);
+            i += 4;
         } else {
             command_args[arg_idx] = argv[i];
             arg_idx++;
         }
     }
+
+    params->mnt_num = mnt_src_idx;
 
 #ifdef DEBUG_MODE
     printf("res_limits->memory_in_bytes -- %s\n", res_limits->memory_in_bytes);
@@ -51,10 +67,17 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
 }
 
 
-void enable_features(int isle_pid) {
-    char* src_dir_path = "/dev/";
-    char* dest_dir_path = "../ubuntu-rootfs/host_dev/";
-    mount_ns_dir(isle_pid, src_dir_path, dest_dir_path);
+void enable_features(int isle_pid, struct process_params *params) {
+    if (params->is_mount) mount_feature(isle_pid, params);
+}
+
+
+void release_resources(int isle_pid, struct process_params *params) {
+    if (params->is_mount) unmount_dirs(isle_pid, params);
+//    rm_cgroup_dirs(isle_pid);
+    free(params->argv);
+    free(params->mnt_src);
+    free(params->mnt_dst);
 }
 
 

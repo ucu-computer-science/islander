@@ -43,6 +43,11 @@ static int child_fn(void *arg) {
 
 
 int main(int argc, char **argv) {
+//int main() {
+//    int argc = 7;
+//    char *argv[] = {"/islander_engine", "/bin/bash", "--mount",
+//                   "src", "../tests/test_mount/", "dst", "../ubuntu-rootfs/host_dev/"};
+
     // Set Process params such as: PIPE file descriptors and Command to execute.
     struct process_params params;
     memset(&params, 0, sizeof(struct process_params));
@@ -76,7 +81,7 @@ int main(int argc, char **argv) {
     set_userns_mappings(child_pid);
 
     // set up cgroup limits
-    config_cgroup_limits(child_pid, &res_limits);
+//    config_cgroup_limits(child_pid, &res_limits);
 
 //    if (params.is_mount)
 
@@ -89,16 +94,12 @@ int main(int argc, char **argv) {
     }
 //
 //    sleep(2);
-    enable_features(child_pid);
+    enable_features(child_pid, &params);
 
     if (waitpid(child_pid, NULL, 0) == -1) {
         kill_process("Failed to wait pid %d: %m\n", child_pid);
     }
 
-    char* dest_dir_path = "../ubuntu-rootfs/host_dev/";
-    unmount_ns_dir(child_pid, dest_dir_path);
-
-    rm_cgroup_dirs(child_pid);
-    free(params.argv);
+    release_resources(child_pid, &params);
     return 0;
 }

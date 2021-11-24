@@ -2,6 +2,25 @@
 #include "../inc/manage_data.h"
 
 
+void mount_feature(int isle_pid, struct process_params *params) {
+//    char* src_dir_path = "/dev/";
+//    char* dest_dir_path = "../ubuntu-rootfs/host_dev/";
+    for (int i = 0; i < params->mnt_num; i++) {
+        printf("mount_feature: src -- %s, dest -- %s\n", params->mnt_src[i],  params->mnt_dst[i]);
+        mount_ns_dir(isle_pid, params->mnt_src[i], params->mnt_dst[i]);
+    }
+}
+
+
+void unmount_dirs(int isle_pid, struct process_params *params) {
+//    char* dest_dir_path = "../ubuntu-rootfs/host_dev/";
+    for (int i = 0; i < params->mnt_num; i++) {
+        printf("unmount_dirs: dest -- %s\n", params->mnt_dst[i]);
+        unmount_ns_dir(isle_pid, params->mnt_dst[i]);
+    }
+}
+
+
 void mount_ns_dir(int isle_pid, char* src_dir_path, char* dest_dir_path) {
     pid_t parent = getpid();
     pid_t pid = fork();
