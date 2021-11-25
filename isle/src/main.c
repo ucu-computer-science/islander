@@ -57,6 +57,10 @@ int main(int argc, char **argv) {
     set_up_default_limits(&res_limits);
 
     parse_args(argc, argv, &params, &res_limits);
+//    params.mnt_src[0] = "/home/denys_herasymuk/UCU/3course_1term/OS_course/Practice/UCU_OS_Course_Project/isle/tests/test_mount/";
+//    params.mnt_dst[0] = "../ubuntu-rootfs/host_dev/";
+//    params.mnt_num = 1;
+//    params.is_mount = true;
 
     // Create pipe to communicate between main and command process.
     if (pipe(params.pipe_fd) < 0)

@@ -43,13 +43,15 @@ void mount_ns_dir(int isle_pid, char* src_dir_path, char* dest_dir_path) {
         // create a new process to avoid undesired shutdown of our application
         char victim_name[] = "nsenter";
 
-        char args_arr[NSENTER_MNT_ARGS][16] = {
+        char args_arr[NSENTER_MNT_ARGS][256] = {
                 "-t", "isle_pid_str", "mount",
                 "--bind", "src_dir_path", "dest_dir_path"
         };
         sprintf(args_arr[1], "%d", isle_pid);
         strcpy(args_arr[4], src_dir_path);
         strcpy(args_arr[5], dest_dir_path);
+//        strcpy(args_arr[4], "/home/denys_herasymuk/UCU/3course_1term/OS_course/Practice/UCU_OS_Course_Project/isle/tests/test_mount/");
+//        strcpy(args_arr[5], "../ubuntu-rootfs/host_dev/");
 
         char **args = malloc( (NSENTER_MNT_ARGS + 2) * sizeof(char*)); //Empty array of pointers
 
