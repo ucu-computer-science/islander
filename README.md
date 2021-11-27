@@ -19,6 +19,26 @@ For more details we recommend to look in section 3 of RedHat documentation about
 |   --device-write-bps [100M]   | Limit write rate the host filesystem (format: `<number>`[`<unit>]`). Number is a positive integer. Unit can be one of kb, mb, or gb. |
 
 
+## Btrfs usage
+
+```shell
+sudo mkfs.btrfs -L data /dev/nvme0n1p5 -f
+
+sudo mount /dev/nvme0n1p5 /var/lib/islander/volumes
+
+sudo btrfs subvolume create /var/lib/islander/volumes/test_volume
+
+sudo btrfs subvolume list /var/lib/islander/volumes
+
+sudo btrfs subvolume show /var/lib/islander/volumes/test_volume
+
+sudo mount /dev/nvme0n1p5 -o subvol=test_volume ./test_volumes/
+
+sudo umount ./test_volumes/
+```
+
+
+
 ## Examples of usage
 
 ### Type of commands

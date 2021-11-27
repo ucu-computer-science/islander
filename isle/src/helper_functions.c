@@ -16,6 +16,8 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
     int arg_idx = 0;
     int mnt_src_idx = 0;
     int mnt_dst_idx = 0;
+    int vlm_src_idx = 0;
+    int vlm_dst_idx = 0;
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--memory-in-bytes") == 0) {
             res_limits->memory_in_bytes = argv[i + 1];
@@ -43,6 +45,14 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
             params->mnt_dst[mnt_dst_idx++] = argv[i + 4];
             printf("parse_args: src -- %s, dest -- %s\n", params->mnt_src[mnt_src_idx - 1],  params->mnt_dst[mnt_dst_idx - 1]);
             i += 4;
+
+        // volume feature
+        } else if (strcmp(argv[i], "--volume") == 0) {
+            params->is_volume = true;
+            params->vlm_src[vlm_src_idx++] = argv[i + 2];
+            params->vlm_dst[vlm_dst_idx++] = argv[i + 4];
+            printf("parse_args: src -- %s, dest -- %s\n", params->vlm_src[vlm_src_idx - 1],  params->vlm_dst[vlm_dst_idx - 1]);
+            i += 4;
         } else {
             command_args[arg_idx] = argv[i];
             arg_idx++;
@@ -50,6 +60,7 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
     }
 
     params->mnt_num = mnt_src_idx;
+    params->vlm_num = vlm_src_idx;
 
 #ifdef DEBUG_MODE
     printf("res_limits->memory_in_bytes -- %s\n", res_limits->memory_in_bytes);
@@ -69,11 +80,13 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
 
 void enable_features(int isle_pid, struct process_params *params) {
     if (params->is_mount) mount_feature(isle_pid, params);
+    if (params->is_volume) volume_feature(isle_pid, params);
 }
 
 
 void release_resources(int isle_pid, struct process_params *params) {
     if (params->is_mount) unmount_dirs(isle_pid, params);
+    if (params->is_volume) unmount_volumes(isle_pid, params);
 //    rm_cgroup_dirs(isle_pid);
     free(params->argv);
     free(params->mnt_src);

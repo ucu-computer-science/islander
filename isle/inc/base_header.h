@@ -26,10 +26,18 @@ struct process_params
     int pipe_fd[PIPE_FD_NUM];
     char **argv;
     int argc;
+
+    // vars for mount feature
     bool is_mount;
     char **mnt_src;
     char **mnt_dst;
     int mnt_num;
+
+    // vars for volume feature
+    bool is_volume;
+    char **vlm_src;
+    char **vlm_dst;
+    int vlm_num;
 };
 
 typedef struct

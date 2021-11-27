@@ -57,10 +57,6 @@ int main(int argc, char **argv) {
     set_up_default_limits(&res_limits);
 
     parse_args(argc, argv, &params, &res_limits);
-//    params.mnt_src[0] = "/home/denys_herasymuk/UCU/3course_1term/OS_course/Practice/UCU_OS_Course_Project/isle/tests/test_mount/";
-//    params.mnt_dst[0] = "../ubuntu-rootfs/host_dev/";
-//    params.mnt_num = 1;
-//    params.is_mount = true;
 
     // Create pipe to communicate between main and command process.
     if (pipe(params.pipe_fd) < 0)
@@ -87,8 +83,6 @@ int main(int argc, char **argv) {
     // set up cgroup limits
 //    config_cgroup_limits(child_pid, &res_limits);
 
-//    if (params.is_mount)
-
     // Signal to the command process we're done with setup.
     if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE) {
         kill_process("Failed to write to pipe: %m");
@@ -96,8 +90,7 @@ int main(int argc, char **argv) {
     if (close(pipe)) {
         kill_process("Failed to close pipe: %m");
     }
-//
-//    sleep(2);
+
     enable_features(child_pid, &params);
 
     if (waitpid(child_pid, NULL, 0) == -1) {
