@@ -15,6 +15,7 @@ static int child_fn(void *arg) {
         kill_process("cannot PR_SET_PDEATHSIG for child process: %m\n");
 
     struct process_params *params = (struct process_params*) arg;
+    
     // Wait for 'setup done' signal from the main process.
     await_setup(params->pipe_fd[PIPE_READ]);
 
@@ -91,7 +92,7 @@ int main(int argc, char **argv) {
         kill_process("Failed to close pipe: %m");
     }
 
-    enable_features(child_pid, &params);
+    enable_features(child_pid, &params, argv[0]);
 
     if (waitpid(child_pid, NULL, 0) == -1) {
         kill_process("Failed to wait pid %d: %m\n", child_pid);

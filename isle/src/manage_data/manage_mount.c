@@ -1,4 +1,3 @@
-#include "../../inc/base_header.h"
 #include "../../inc/manage_data/manage_mount.h"
 
 
@@ -6,7 +5,7 @@ void mount_feature(int isle_pid, struct process_params *params) {
 //    char* src_dir_path = "/dev/";
 //    char* dest_dir_path = "../ubuntu-rootfs/host_dev/";
     for (int i = 0; i < params->mnt_num; i++) {
-        printf("mount_feature: src -- %s, dest -- %s\n", params->mnt_src[i],  params->mnt_dst[i]);
+//        printf("mount_feature: src -- %s, dest -- %s\n", params->mnt_src[i],  params->mnt_dst[i]);
         mount_ns_dir(isle_pid, params->mnt_src[i], params->mnt_dst[i]);
     }
 }
@@ -15,7 +14,7 @@ void mount_feature(int isle_pid, struct process_params *params) {
 void unmount_dirs(int isle_pid, struct process_params *params) {
 //    char* dest_dir_path = "../ubuntu-rootfs/host_dev/";
     for (int i = 0; i < params->mnt_num; i++) {
-        printf("unmount_dirs: dest -- %s\n", params->mnt_dst[i]);
+//        printf("unmount_dirs: dest -- %s\n", params->mnt_dst[i]);
         unmount_ns_dir(isle_pid, params->mnt_dst[i]);
     }
 }
@@ -31,11 +30,11 @@ void mount_ns_dir(int isle_pid, char* src_dir_path, char* dest_dir_path) {
     }
     else if (pid > 0) {
         // We are parent process
-        printf("Parent: Parent PID: %d, child PID: %d\n", parent, pid);
+//        printf("Parent: Parent PID: %d, child PID: %d\n", parent, pid);
 
         int status;
         waitpid(pid, &status, 0);
-        printf("Parent: child stopped, exit code: %d\n", status);
+//        printf("Parent: child stopped, exit code: %d\n", status);
     }
     else {
         // We are the child.
@@ -58,7 +57,7 @@ void mount_ns_dir(int isle_pid, char* src_dir_path, char* dest_dir_path) {
         args[0] = victim_name;
         for (int i = 1; i < NSENTER_MNT_ARGS; i++) {
             args[i] = args_arr[i - 1];
-            printf("%s\n", args[i]);
+//            printf("%s\n", args[i]);
         }
         args[NSENTER_MNT_ARGS] = NULL;
 
@@ -81,11 +80,11 @@ void unmount_ns_dir(int isle_pid, char* dest_dir_path) {
     }
     else if (pid > 0) {
         // We are parent process
-        printf("Parent: Parent PID: %d, child PID: %d\n", parent, pid);
+//        printf("Parent: Parent PID: %d, child PID: %d\n", parent, pid);
 
         int status;
         waitpid(pid, &status, 0);
-        printf("Parent: child stopped, exit code: %d\n", status);
+//        printf("Parent: child stopped, exit code: %d\n", status);
     }
     else {
         // We are the child.
@@ -105,7 +104,7 @@ void unmount_ns_dir(int isle_pid, char* dest_dir_path) {
         args[0] = victim_name;
         for (int i = 1; i < NSENTER_UNMNT_ARGS; i++) {
             args[i] = args_arr[i - 1];
-            printf("%s\n", args[i]);
+//            printf("%s\n", args[i]);
         }
         args[NSENTER_UNMNT_ARGS] = NULL;
 

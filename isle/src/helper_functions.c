@@ -44,7 +44,6 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
             params->is_mount = true;
             params->mnt_src[mnt_src_idx++] = argv[i + 2];
             params->mnt_dst[mnt_dst_idx++] = argv[i + 4];
-            printf("parse_args: src -- %s, dest -- %s\n", params->mnt_src[mnt_src_idx - 1],  params->mnt_dst[mnt_dst_idx - 1]);
             i += 4;
 
         // volume feature
@@ -52,7 +51,6 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
             params->is_volume = true;
             params->vlm_src[vlm_src_idx++] = argv[i + 2];
             params->vlm_dst[vlm_dst_idx++] = argv[i + 4];
-            printf("parse_args: src -- %s, dest -- %s\n", params->vlm_src[vlm_src_idx - 1],  params->vlm_dst[vlm_dst_idx - 1]);
             i += 4;
         } else {
             command_args[arg_idx] = argv[i];
@@ -79,9 +77,9 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
 }
 
 
-void enable_features(int isle_pid, struct process_params *params) {
+void enable_features(int isle_pid, struct process_params *params, const char *exec_file_path) {
     if (params->is_mount) mount_feature(isle_pid, params);
-    if (params->is_volume) volume_feature(isle_pid, params);
+    if (params->is_volume) volume_feature(isle_pid, params, exec_file_path);
 }
 
 

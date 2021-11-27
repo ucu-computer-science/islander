@@ -1,7 +1,8 @@
 #ifndef NAMESPACES_MANAGE_DATA_H
 #define NAMESPACES_MANAGE_DATA_H
 
-#include ''
+#include "../helper_functions.h"
+#include "../base_header.h"
 
 void mount_feature(int isle_pid, struct process_params *params);
 

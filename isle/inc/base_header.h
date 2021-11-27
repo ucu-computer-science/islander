@@ -13,6 +13,7 @@
 #include <sys/prctl.h>
 #include <sys/stat.h>
 #include <wait.h>
+#include <pwd.h>
 #include <memory.h>
 #include <syscall.h>
 #include <errno.h>
