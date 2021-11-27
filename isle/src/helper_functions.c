@@ -86,7 +86,8 @@ void enable_features(int isle_pid, struct process_params *params, const char *ex
 void release_resources(int isle_pid, struct process_params *params) {
     if (params->is_mount) unmount_dirs(isle_pid, params);
     if (params->is_volume) unmount_volumes(isle_pid, params);
-//    rm_cgroup_dirs(isle_pid);
+    rm_cgroup_dirs(isle_pid);
+
     free(params->argv);
     free(params->mnt_src);
     free(params->mnt_dst);

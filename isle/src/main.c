@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     set_userns_mappings(child_pid);
 
     // set up cgroup limits
-//    config_cgroup_limits(child_pid, &res_limits);
+    config_cgroup_limits(child_pid, &res_limits);
 
     // Signal to the command process we're done with setup.
     if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE) {
