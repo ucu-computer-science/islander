@@ -1,5 +1,4 @@
 #include "../inc/helper_functions.h"
-#include "../inc/manage_data.h"
 #include "../inc/cgroup_functions.h"
 
 #define MNT_FREQUENCY 5.0
@@ -10,6 +9,8 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
     char** command_args = calloc(argc, sizeof(char*));
     params->mnt_src = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
     params->mnt_dst = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
+    params->vlm_src = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
+    params->vlm_dst = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
 
     // Split argv on limits for cgroup and arguments for command,
     // which will be executed via execvp()
@@ -91,6 +92,8 @@ void release_resources(int isle_pid, struct process_params *params) {
     free(params->argv);
     free(params->mnt_src);
     free(params->mnt_dst);
+    free(params->vlm_src);
+    free(params->vlm_dst);
 }
 
 

@@ -1,5 +1,5 @@
-#include "../inc/base_header.h"
-#include "../inc/manage_data.h"
+#include "../../inc/base_header.h"
+#include "../../inc/manage_data/manage_mount.h"
 
 
 void mount_feature(int isle_pid, struct process_params *params) {

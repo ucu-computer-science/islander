@@ -9,6 +9,8 @@
 #include <memory.h>
 
 #include "./base_header.h"
+#include "./manage_data/manage_mount.h"
+#include "./manage_data/manage_volumes.h"
 
 #define PIPE_FD_NUM 2
 #define PIPE_OK_MSG "OK"

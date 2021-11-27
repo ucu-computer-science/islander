@@ -12,6 +12,7 @@
 #define PIPE_MSG_SIZE 2
 
 #define SRC_ROOTFS_PATH "../ubuntu-rootfs"
+#define SRC_VOLUMES_PATH "/var/lib/islander/volumes/"
 #define NSENTER_MNT_ARGS 7
 #define NSENTER_UNMNT_ARGS 6
 
