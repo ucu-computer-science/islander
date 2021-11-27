@@ -3,6 +3,7 @@
 
 #include "../inc/usernamespace.h"
 #include "../inc/mntnamespace.h"
+#include "../inc/netnamespace.h"
 
 
 static char cmd_stack[STACKSIZE];
@@ -55,7 +56,7 @@ int main(int argc, char **argv) {
     int clone_flags =
             // if the command process exits, it leaves an exit status
             // so that we can reap it.
-            SIGCHLD | CLONE_NEWUTS | CLONE_NEWUSER | CLONE_NEWNS | CLONE_NEWPID;
+            SIGCHLD | CLONE_NEWUTS | CLONE_NEWUSER | CLONE_NEWNS | CLONE_NEWPID | CLONE_NEWNET;
     pid_t child_pid = clone(child_fn, cmd_stack + STACKSIZE, clone_flags, &params);
 
     // Kill process if failed to create.
@@ -68,6 +69,7 @@ int main(int argc, char **argv) {
 
     // Set proper namespace mappings to give the ROOT privillages to child process.
     set_userns_mappings(child_pid);
+    set_netns(child_pid);
 
     // set up cgroup
     config_cgroup_limits(child_pid);
