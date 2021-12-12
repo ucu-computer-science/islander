@@ -9,6 +9,8 @@
 #include <memory.h>
 
 #include "./base_header.h"
+#include "./manage_data/manage_mount.h"
+#include "./manage_data/manage_volumes.h"
 
 #define PIPE_FD_NUM 2
 #define PIPE_OK_MSG "OK"
@@ -25,6 +27,10 @@ static void kill_process(const char *msg, ...) {
 }
 
 void parse_args(int argc, char** argv, struct process_params *params, resource_limits *res_limits);
+
+void enable_features(int isle_pid, struct process_params *params, const char *exec_file_path);
+
+void release_resources(int isle_pid, struct process_params *params);
 
 void write_file(char path[100], char line[100]);
 

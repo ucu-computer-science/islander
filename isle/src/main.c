@@ -1,6 +1,7 @@
 #include "../inc/base_header.h"
 #include "../inc/cgroup_functions.h"
 #include "../inc/helper_functions.h"
+#include "../inc/manage_data/manage_mount.h"
 
 #include "../inc/usernamespace.h"
 #include "../inc/mntnamespace.h"
@@ -15,10 +16,11 @@ static int child_fn(void *arg) {
         kill_process("cannot PR_SET_PDEATHSIG for child process: %m\n");
 
     struct process_params *params = (struct process_params*) arg;
+    
     // Wait for 'setup done' signal from the main process.
     await_setup(params->pipe_fd[PIPE_READ]);
 
-    setup_mntns("../ubuntu-rootfs");
+    setup_mntns(SRC_ROOTFS_PATH);
 
     // Assuming, 0 in the current namespace maps to
     // a non-privileged UID in the parent namespace,
@@ -43,6 +45,11 @@ static int child_fn(void *arg) {
 
 
 int main(int argc, char **argv) {
+//int main() {
+//    int argc = 7;
+//    char *argv[] = {"/islander_engine", "/bin/bash", "--mount",
+//                   "src", "../tests/test_mount/", "dst", "../ubuntu-rootfs/host_dev/"};
+
     // Set Process params such as: PIPE file descriptors and Command to execute.
     struct process_params params;
     memset(&params, 0, sizeof(struct process_params));
@@ -72,11 +79,11 @@ int main(int argc, char **argv) {
     // Get the writable end of the pipe.
     int pipe = params.pipe_fd[PIPE_WRITE];
 
-    // Set proper namespace mappings to give the ROOT privillages to child process.
+    // Set proper namespace mappings to give the ROOT privileges to child process.
     set_userns_mappings(child_pid);
     set_netns(child_pid);
 
-    // set up cgroup
+    // set up cgroup limits
     config_cgroup_limits(child_pid, &res_limits);
 
     // Signal to the command process we're done with setup.
@@ -87,11 +94,12 @@ int main(int argc, char **argv) {
         kill_process("Failed to close pipe: %m");
     }
 
+    enable_features(child_pid, &params, argv[0]);
+
     if (waitpid(child_pid, NULL, 0) == -1) {
         kill_process("Failed to wait pid %d: %m\n", child_pid);
     }
 
-    rm_cgroup_dirs(child_pid);
-    free(params.argv);
+    release_resources(child_pid, &params);
     return 0;
 }

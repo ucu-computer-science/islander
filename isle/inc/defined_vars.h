@@ -11,14 +11,22 @@
 #define PIPE_OK_MSG "OK"
 #define PIPE_MSG_SIZE 2
 
+#define SRC_ROOTFS_PATH "../ubuntu-rootfs"
+//#define SRC_VOLUMES_PATH "/var/lib/islander/volumes/"
+#define SRC_VOLUMES_PATH "islander/volumes/"
+#define NSENTER_MNT_ARGS 7
+#define NSENTER_VLM_ARGS 8
+#define NSENTER_UNMNT_ARGS 6
+
 // error codes
 #define SUCCESS 0
-#define FUNC_FAILED -1
 #define OPEN_FILE_ERR -2
 #define READ_FILE_ERR -3
 #define WRITE_FILE_ERR -4
 #define ERROR_INPUT -5
 #define INVALID_ARG -6
+#define MOUNT_FAIL -7
+#define UMOUNT_FAIL -8
 
 #define STDOUT_DESC 1
 #define ERROR_DESC 2

@@ -19,7 +19,43 @@ For more details we recommend to look in section 3 of RedHat documentation about
 |   --device-write-bps [100M]   | Limit write rate the host filesystem (format: `<number>`[`<unit>]`). Number is a positive integer. Unit can be one of kb, mb, or gb. |
 
 
-## Examples of usage
+## Manage data
+
+### Test data management
+
+```shell
+# example of mount feature usage
+sudo ./islander_engine /bin/bash --mount src ../tests/test_mount/ dst ../ubuntu-rootfs/test_mnt/ --mount src /dev/ dst ../ubuntu-rootfs/host_dev/
+
+# example of mount feature usage
+sudo ./islander_engine /bin/bash --volume src test_mnt1 dst ../ubuntu-rootfs/test_mnt/ --volume src host_dev dst ../ubuntu-rootfs/host_dev/
+
+# check results in ~/islander/volumes
+sudo sh -c "cd test_mnt1/; ls"
+```
+
+
+### Btrfs usage
+
+```shell
+sudo mkfs.btrfs -L data /dev/nvme0n1p5 -f
+
+sudo mount /dev/nvme0n1p5 ~/islander/volumes/
+
+sudo btrfs subvolume create /var/lib/islander/volumes/test_volume
+
+sudo btrfs subvolume list /var/lib/islander/volumes
+
+sudo btrfs subvolume show /var/lib/islander/volumes/test_volume
+
+sudo mount /dev/nvme0n1p5 -o subvol=test_volume ./test_volumes/
+
+sudo umount ./test_volumes/
+```
+
+
+
+## Limit management
 
 ### Type of commands
 

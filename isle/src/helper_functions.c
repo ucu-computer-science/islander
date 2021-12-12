@@ -1,14 +1,24 @@
 #include "../inc/helper_functions.h"
+#include "../inc/cgroup_functions.h"
 
+#define MNT_FREQUENCY 5.0
 
 void parse_args(int argc, char** argv, struct process_params *params, resource_limits *res_limits) {
     if (argc < 2) exit(0);
 
     char** command_args = calloc(argc, sizeof(char*));
+    params->mnt_src = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
+    params->mnt_dst = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
+    params->vlm_src = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
+    params->vlm_dst = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
 
     // Split argv on limits for cgroup and arguments for command,
     // which will be executed via execvp()
     int arg_idx = 0;
+    int mnt_src_idx = 0;
+    int mnt_dst_idx = 0;
+    int vlm_src_idx = 0;
+    int vlm_dst_idx = 0;
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--memory-in-bytes") == 0) {
             res_limits->memory_in_bytes = argv[i + 1];
@@ -28,25 +38,61 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
         } else if (strcmp(argv[i], "--device-write-bps") == 0) {
             res_limits->device_write_bps = argv[i + 1];
             i++;
+
+        // mount feature
+        } else if (strcmp(argv[i], "--mount") == 0) {
+            params->is_mount = true;
+            params->mnt_src[mnt_src_idx++] = argv[i + 2];
+            params->mnt_dst[mnt_dst_idx++] = argv[i + 4];
+            i += 4;
+
+        // volume feature
+        } else if (strcmp(argv[i], "--volume") == 0) {
+            params->is_volume = true;
+            params->vlm_src[vlm_src_idx++] = argv[i + 2];
+            params->vlm_dst[vlm_dst_idx++] = argv[i + 4];
+            i += 4;
         } else {
             command_args[arg_idx] = argv[i];
             arg_idx++;
         }
     }
 
-//#ifdef DEBUG_MODE
+    params->mnt_num = mnt_src_idx;
+    params->vlm_num = vlm_src_idx;
+
+#ifdef DEBUG_MODE
     printf("res_limits->memory_in_bytes -- %s\n", res_limits->memory_in_bytes);
     printf("res_limits->cpu_shares -- %s\n", res_limits->cpu_shares);
     printf("res_limits->cpu_period -- %s\n", res_limits->cpu_period);
     printf("res_limits->cpu_quota -- %s\n", res_limits->cpu_quota);
     printf("res_limits->device_read_bps -- %s\n", res_limits->device_read_bps);
     printf("res_limits->device_write_bps -- %s\n", res_limits->device_write_bps);
-//#endif
+#endif
 
     // Add NULL at the end since exec syscall take such format of argv
     command_args[arg_idx++] = NULL;
     params->argc = arg_idx;
     params->argv = command_args;
+}
+
+
+void enable_features(int isle_pid, struct process_params *params, const char *exec_file_path) {
+    if (params->is_mount) mount_feature(isle_pid, params);
+    if (params->is_volume) volume_feature(isle_pid, params, exec_file_path);
+}
+
+
+void release_resources(int isle_pid, struct process_params *params) {
+    if (params->is_mount) unmount_dirs(isle_pid, params);
+    if (params->is_volume) unmount_volumes(isle_pid, params);
+    rm_cgroup_dirs(isle_pid);
+
+    free(params->argv);
+    free(params->mnt_src);
+    free(params->mnt_dst);
+    free(params->vlm_src);
+    free(params->vlm_dst);
 }
 
 
