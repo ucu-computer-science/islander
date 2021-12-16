@@ -1,12 +1,12 @@
 #include "../inc/base_header.h"
 #include "../inc/cgroup_functions.h"
-
 #include "../inc/usernamespace.h"
 #include "../inc/mntnamespace.h"
 #include "../inc/netnamespace.h"
 
 
 static char cmd_stack[STACKSIZE];
+
 
 static int child_fn(void *arg) {
     // Kill the cmd process if the isolate process die.
@@ -17,8 +17,8 @@ static int child_fn(void *arg) {
     // Wait for 'setup done' signal from the main process.
     await_setup(params->pipe_fd[PIPE_READ]);
 
-//    setup_mntns("../rootfs");
-    setup_mntns("../rootfs-alpine-stress");
+    // Set up mount namespace.
+    setup_mntns("../isle/rootfs-alpine-stress");
 
     // Assuming, 0 in the current namespace maps to
     // a non-privileged UID in the parent namespace,
@@ -38,15 +38,14 @@ static int child_fn(void *arg) {
 }
 
 
-//int main() {
 int main(int argc, char **argv) {
-//    int argc = 2;
-//    char **argv = {"./namespace", "sh"};
+    // Create new argv array for the command arguments, not program.
+    char* new_argv[2]; // TODO: usage right now: sudo ./namespaces sh --name isle-name
 
     // Set Process params such as: PIPE file descriptors and Command to execute.
     struct process_params params;
     memset(&params, 0, sizeof(struct process_params));
-    parse_args(argc, argv, &params);
+    parse_args(argc, argv, new_argv, &params);
 
     // Create pipe to communicate between main and command process.
     if (pipe(params.pipe_fd) < 0)
@@ -63,6 +62,10 @@ int main(int argc, char **argv) {
     if (child_pid < 0)
         kill_process("Failed to clone: %m\n");
     printf("PID: %ld\n", (long)child_pid);
+
+    // Create associated with isle file that contains its args.
+    char* filename = argv[3];
+    create_islenode(filename, child_pid);
 
     // Get the writable end of the pipe.
     int pipe = params.pipe_fd[PIPE_WRITE];
@@ -88,6 +91,5 @@ int main(int argc, char **argv) {
 
     // TODO: check if rm_cgroup_dirs works correct when we end process
     rm_cgroup_dirs(child_pid);
-
     return 0;
 }
