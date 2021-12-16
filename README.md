@@ -27,13 +27,34 @@ For more details we recommend to look in section 3 of RedHat documentation about
 # example of mount feature usage
 sudo ./islander_engine /bin/bash --mount src ../tests/test_mount/ dst ../ubuntu-rootfs/test_mnt/ --mount src /dev/ dst ../ubuntu-rootfs/host_dev/
 
-# example of mount feature usage
+# example of volume feature usage
 sudo ./islander_engine /bin/bash --volume src test_mnt1 dst ../ubuntu-rootfs/test_mnt/ --volume src host_dev dst ../ubuntu-rootfs/host_dev/
 
 # check results in ~/islander/volumes
 sudo sh -c "cd test_mnt1/; ls"
+
+# example of tmpfs feature usage
+sudo ./islander_engine /bin/bash --tmpfs dst ../ubuntu-rootfs/test_tmpfs size 2G nr_inodes 1k
 ```
 
+
+### tmpfs usage
+```shell
+# filter in htop
+
+sudo mount -t tmpfs -o size=2G,nr_inodes=1k,mode=777 tmpfs ./reports
+
+df -h
+
+# create 1G temp file
+dd if=/dev/zero of=./writetest bs=256k count=4000 conv=fdatasync
+
+htop
+
+df -h
+
+sudo umount -R ./reports
+```
 
 ### Btrfs usage
 

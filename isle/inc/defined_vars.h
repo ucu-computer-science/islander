@@ -16,6 +16,7 @@
 #define SRC_VOLUMES_PATH "islander/volumes/"
 #define NSENTER_MNT_ARGS 7
 #define NSENTER_VLM_ARGS 8
+#define NSENTER_TMPFS_ARGS 9
 #define NSENTER_UNMNT_ARGS 6
 
 // error codes

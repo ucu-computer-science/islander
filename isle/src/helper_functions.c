@@ -52,6 +52,14 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
             params->vlm_src[vlm_src_idx++] = argv[i + 2];
             params->vlm_dst[vlm_dst_idx++] = argv[i + 4];
             i += 4;
+
+        // tmpfs feature
+        } else if (strcmp(argv[i], "--tmpfs") == 0) {
+            params->is_tmpfs = true;
+            params->tmpfs_dst = argv[i + 2];
+            params->tmpfs_size = argv[i + 4];
+            params->tmpfs_nr_inodes = argv[i + 6];
+            i += 6;
         } else {
             command_args[arg_idx] = argv[i];
             arg_idx++;
@@ -80,12 +88,14 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
 void enable_features(int isle_pid, struct process_params *params, const char *exec_file_path) {
     if (params->is_mount) mount_feature(isle_pid, params);
     if (params->is_volume) volume_feature(isle_pid, params, exec_file_path);
+    if (params->is_tmpfs) mount_ns_tmpfs(isle_pid, params);
 }
 
 
 void release_resources(int isle_pid, struct process_params *params) {
     if (params->is_mount) unmount_dirs(isle_pid, params);
     if (params->is_volume) unmount_volumes(isle_pid, params);
+    if (params->is_tmpfs) unmount_ns_dir(isle_pid, params->tmpfs_dst);
     rm_cgroup_dirs(isle_pid);
 
     free(params->argv);

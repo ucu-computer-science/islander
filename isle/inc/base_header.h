@@ -39,6 +39,12 @@ struct process_params
     char **vlm_src;
     char **vlm_dst;
     int vlm_num;
+
+    // vars for tmpfs feature
+    bool is_tmpfs;
+    char *tmpfs_dst;
+    char *tmpfs_size;
+    char *tmpfs_nr_inodes;
 };
 
 typedef struct
