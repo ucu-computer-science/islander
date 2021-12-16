@@ -10,6 +10,7 @@
 
 static char cmd_stack[STACKSIZE];
 
+
 static int child_fn(void *arg) {
     // Kill the cmd process if the isolate process die.
     if (prctl(PR_SET_PDEATHSIG, SIGKILL))
@@ -19,6 +20,7 @@ static int child_fn(void *arg) {
     
     // Wait for 'setup done' signal from the main process.
     await_setup(params->pipe_fd[PIPE_READ]);
+
 
     setup_mntns(SRC_ROOTFS_PATH);
 
@@ -75,6 +77,10 @@ int main(int argc, char **argv) {
     if (child_pid < 0)
         kill_process("Failed to clone: %m\n");
     printf("PID: %ld\n", (long)child_pid);
+
+    // Create associated with isle file that contains its args.
+    char* filename = argv[3];
+    create_islenode(filename, child_pid);
 
     // Get the writable end of the pipe.
     int pipe = params.pipe_fd[PIPE_WRITE];

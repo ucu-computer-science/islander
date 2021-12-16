@@ -18,6 +18,7 @@
 #include <syscall.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "./defined_vars.h"
 
@@ -50,6 +51,5 @@ typedef struct
     char* device_read_bps;
     char* device_write_bps;
 } resource_limits;
-
 
 #endif //NAMESPACES_BASE_HEADER_H

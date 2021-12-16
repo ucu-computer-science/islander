@@ -146,6 +146,17 @@ void create_dir(char* subsystem_path) {
 }
 
 
+void arr_slice(char** arr, size_t size, char** new_arr, size_t start, size_t end) {
+    if (end >= size)
+        perror("Index out of bounds");
+
+    size_t j = 0;
+    for (size_t i = start; i < end; i++, j++) {
+        new_arr[j] = arr[i];
+    }
+}
+
+
 void write_file(char path[100], char line[100]) {
     FILE *f = fopen(path, "w");
 
@@ -155,4 +166,22 @@ void write_file(char path[100], char line[100]) {
         kill_process("Failed to write to file %s:\n", path);
     if (fclose(f) != 0)
         kill_process("Failed to close file %s: %m\n", path);
+}
+
+
+/* Create file that contains information about the isle itself
+ * like PID, Name, Time created. */
+void create_islenode(char* isle_name, int isle_pid) {
+    // Provide a path for the file that needs to be created
+    char file_name[strlen("../isle/isles/") + strlen(isle_name) + strlen(".txt")];
+    sprintf(file_name, "../isle/isles/%s.txt", isle_name);
+    // Create file.
+    FILE* file = fopen(file_name, "w");
+    // Get the current timestamp.
+    time_t t;
+    time(&t);
+    char* time = ctime(&t);
+    // Write isle parameters to the associated file separeted with \n
+    fprintf(file, "%d\n%s\n%s", isle_pid, isle_name, time);
+    fclose(file);
 }
