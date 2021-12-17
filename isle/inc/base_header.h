@@ -18,6 +18,7 @@
 #include <syscall.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "./defined_vars.h"
 
@@ -27,6 +28,9 @@ struct process_params
     int pipe_fd[PIPE_FD_NUM];
     char **argv;
     int argc;
+
+    // vars for islenode
+    char* name;
 
     // vars for mount feature
     bool is_mount;

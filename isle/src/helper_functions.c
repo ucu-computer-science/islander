@@ -60,6 +60,11 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
             params->tmpfs_size = argv[i + 4];
             params->tmpfs_nr_inodes = argv[i + 6];
             i += 6;
+
+        // islenode feature
+        } else if (strcmp(argv[i], "--name") == 0) {
+            params->name = argv[i + 1];
+            i++;
         } else {
             command_args[arg_idx] = argv[i];
             arg_idx++;
@@ -165,4 +170,22 @@ void write_file(char path[100], char line[100]) {
         kill_process("Failed to write to file %s:\n", path);
     if (fclose(f) != 0)
         kill_process("Failed to close file %s: %m\n", path);
+}
+
+
+/* Create file that contains information about the isle itself
+ * like PID, Name, Time created. */
+void create_islenode(char* isle_name, int isle_pid) {
+    // Provide a path for the file that needs to be created
+    char file_name[strlen(ISLENODE_DIR_PATH) + strlen(isle_name) + strlen(ISLENODE_FORMAT)];
+    sprintf(file_name, "%s%s%s", ISLENODE_DIR_PATH, isle_name, ISLENODE_FORMAT);
+    // Create file.
+    FILE* file = fopen(file_name, "w");
+    // Get the current timestamp.
+    time_t t;
+    time(&t);
+    char* time = ctime(&t);
+    // Write isle parameters to the associated file separeted with \n
+    fprintf(file, "%d\n%s\n%s", isle_pid, isle_name, time);
+    fclose(file);
 }

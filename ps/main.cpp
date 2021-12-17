@@ -77,7 +77,7 @@ std::vector<struct islenode> parse_files(std::vector<std::string> &files, std::s
 
 
 int main() {
-    std::string path = "../isle/isles";
+    std::string path = "../isle/islenodes";
     rls(path, FTW_PHYS);
 
     // Skip the directory.
