@@ -71,6 +71,13 @@ int main(int argc, char **argv) {
     printf("PID: %ld\n", (long)child_pid);
     printf("after PID\n");
 
+    // Create islenode file for the isle
+    if (params.name) {
+        create_islenode(params.name, child_pid);
+    } else {
+        create_islenode("islander", child_pid);
+    }
+
     // Get the writable end of the pipe.
     int pipe = params.pipe_fd[PIPE_WRITE];
 
