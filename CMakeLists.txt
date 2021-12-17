@@ -36,10 +36,10 @@ find_package(Boost 1.71.0 COMPONENTS program_options REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 target_link_libraries(${PROJECT_NAME} Boost::program_options)
 
-#! set output directory (bin)
-set_target_properties(${PROJECT_NAME}
-						PROPERTIES
-						RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+# #! set output directory (bin)
+# set_target_properties(${PROJECT_NAME}
+# 						PROPERTIES
+# 						RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 #####################################
 # Define ALL_TARGETS variable to use in PVS and Sanitizers

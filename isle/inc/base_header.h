@@ -18,7 +18,6 @@
 #include <syscall.h>
 #include <errno.h>
 #include <stdbool.h>
-#include <time.h>
 
 #include "./defined_vars.h"
 
@@ -40,6 +39,12 @@ struct process_params
     char **vlm_src;
     char **vlm_dst;
     int vlm_num;
+
+    // vars for tmpfs feature
+    bool is_tmpfs;
+    char *tmpfs_dst;
+    char *tmpfs_size;
+    char *tmpfs_nr_inodes;
 };
 
 typedef struct
@@ -51,5 +56,6 @@ typedef struct
     char* device_read_bps;
     char* device_write_bps;
 } resource_limits;
+
 
 #endif //NAMESPACES_BASE_HEADER_H

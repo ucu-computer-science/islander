@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-
-set(PROJECT_NAME islander_engine)
-project(${PROJECT_NAME} C CXX)
+project(islander_engine C CXX)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 17)
@@ -13,11 +11,6 @@ AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/src SOURCES)
 AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/inc/manage_data MNG_DATA_HEADERS)
 AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/src/manage_data MNG_DATA_SOURCES)
 
-add_executable(${PROJECT_NAME}
+add_executable(islander_engine
         ${SOURCES} ${HEADERS}
         ${MNG_DATA_HEADERS} ${MNG_DATA_SOURCES})
-        
-#! set output directory (bin)
-set_target_properties(${PROJECT_NAME}
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)
