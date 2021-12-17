@@ -23,15 +23,6 @@ void mount_ns_tmpfs(int isle_pid, struct process_params *params) {
         // Here we use nsenter to enter namespace and make mount command inside it.
         char victim_name[] = "nsenter";
 
-//        char args_arr[NSENTER_TMPFS_ARGS][256] = {
-//                "-t", "<ISLE_PID_STR>", "mount",
-//                "-t", "tmpfs", "-o",
-////                "size=", "nr_inodes=", "mode=770",
-//                "<CONFIGS>",
-////                "tmpfs",
-//                "/dev/shm",
-//                "<MOUNT_POINT>"
-//        };
         char args_arr[NSENTER_TMPFS_ARGS][256] = {
                 "-t", "<ISLE_PID_STR>", "mount",
                 "-t", "tmpfs",
@@ -47,15 +38,7 @@ void mount_ns_tmpfs(int isle_pid, struct process_params *params) {
         options[0] = '\0';
         str_array_concat(options, str_arr, 5);
         strcpy(args_arr[8], options);
-//        printf("args_arr[8] -- %s\n", args_arr[8]);
 
-//        // nr_inodes
-//        char *str_arr2[] = {args_arr[7], params->tmpfs_nr_inodes};
-//        char tmpfs_nr_inodes[256];
-//        tmpfs_nr_inodes[0] = '\0';
-//        str_array_concat(tmpfs_nr_inodes, str_arr2, 2);
-//        strcpy(args_arr[7], tmpfs_nr_inodes);
-//
         // tmpfs_dst
         strcpy(args_arr[6], params->tmpfs_dst);
 
@@ -68,11 +51,6 @@ void mount_ns_tmpfs(int isle_pid, struct process_params *params) {
             printf("%s\n", args[i]);
         }
         args[NSENTER_TMPFS_ARGS + 1] = NULL;
-
-//        for (int i = 0; i < NSENTER_TMPFS_ARGS + 2; i++) {
-//            printf("%d\n", i);
-//            printf("%s\n", args[i]);
-//        }
 
         // Environment is ready
         execvp(victim_name, args);
