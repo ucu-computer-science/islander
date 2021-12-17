@@ -18,6 +18,15 @@ For more details we recommend to look in section 3 of RedHat documentation about
 |   --device-read-bps [500M]   | Limit read rate from the host filesystem (format: `<number>`[`<unit>`]). Number is a positive integer. Unit can be one of kb, mb, or gb. |
 |   --device-write-bps [100M]   | Limit write rate the host filesystem (format: `<number>`[`<unit>]`). Number is a positive integer. Unit can be one of kb, mb, or gb. |
 
+## Compile Project
+```shell
+# 1. Create all required folders and install rootfs:
+make install_rootfs
+make create_dirs
+
+# 2. Compile all the subprojects at once:
+make
+```
 
 ## Manage data
 
