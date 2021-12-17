@@ -52,10 +52,6 @@ void mount_ns_tmpfs(int isle_pid, struct process_params *params) {
         // tmpfs_dst
         strcpy(args_arr[8], params->tmpfs_dst);
 
-        for (int i = 0; i < NSENTER_TMPFS_ARGS; i++) {
-            printf("%s\n", args_arr[i]);
-        }
-
         char **args = malloc( (NSENTER_TMPFS_ARGS + 2) * sizeof(char*)); // Empty array of pointers
 
         args[0] = victim_name;
@@ -63,6 +59,10 @@ void mount_ns_tmpfs(int isle_pid, struct process_params *params) {
             args[i] = args_arr[i - 1];
         }
         args[NSENTER_TMPFS_ARGS] = NULL;
+
+        for (int i = 0; i < NSENTER_TMPFS_ARGS; i++) {
+            printf("%s\n", args[i]);
+        }
 
         // Environment is ready
         execvp(victim_name, args);
