@@ -1,6 +1,6 @@
 # Build all islander-related projects.
-.PHONY: all islander_enjine ps install_rootfs
-all: islander_enjine ps install_rootfs
+.PHONY: all islander_enjine ps
+all: islander_enjine ps
 
 # Build 'islander namespaces' project.
 islander_enjine:
