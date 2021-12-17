@@ -74,6 +74,34 @@ sudo mount /dev/nvme0n1p5 -o subvol=test_volume ./test_volumes/
 sudo umount ./test_volumes/
 ```
 
+### Namespaces Usage
+```shell
+# Check User Namespace
+id
+
+# Check UTS Namespace
+hostname <some-host-name>
+hostname
+
+# Check Mount Namespace
+ls
+cd ..
+ls
+
+# Check PID Namespace
+echo $$
+
+# Check Network Namespace
+ip link list
+ping 10.1.1.1
+```
+
+### PS Usage
+```shell
+shell-main # sudo ./islander_engine /bin/bash
+
+shell-seconady # ./ps
+```
 
 
 ## Limit management
