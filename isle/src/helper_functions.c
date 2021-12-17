@@ -60,7 +60,7 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
             params->tmpfs_size = argv[i + 4];
             params->tmpfs_nr_inodes = argv[i + 6];
             i += 6;
-
+          
         // islenode feature
         } else if (strcmp(argv[i], "--name") == 0) {
             params->name = argv[i + 1];

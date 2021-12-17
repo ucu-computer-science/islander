@@ -44,11 +44,6 @@ static int child_fn(void *arg) {
 
 
 int main(int argc, char **argv) {
-//int main() {
-//    int argc = 7;
-//    char *argv[] = {"/islander_engine", "/bin/bash", "--mount",
-//                   "src", "../tests/test_mount/", "dst", "../ubuntu-rootfs/host_dev/"};
-
     // Set Process params such as: PIPE file descriptors and Command to execute.
     struct process_params params;
     memset(&params, 0, sizeof(struct process_params));
@@ -74,6 +69,7 @@ int main(int argc, char **argv) {
     if (child_pid < 0)
         kill_process("Failed to clone: %m\n");
     printf("PID: %ld\n", (long)child_pid);
+    printf("after PID\n");
 
     // Create islenode file for the isle
     if (params.name) {

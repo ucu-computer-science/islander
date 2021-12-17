@@ -25,44 +25,32 @@ void mount_ns_tmpfs(int isle_pid, struct process_params *params) {
 
         char args_arr[NSENTER_TMPFS_ARGS][256] = {
                 "-t", "<ISLE_PID_STR>", "mount",
-                "-t", "tmpfs", "-o",
-//                "size=", "nr_inodes=", "mode=770",
-                "<CONFIGS>",
-//                "tmpfs",
-                "/dev/shm",
-                "<MOUNT_POINT>"
+                "-t", "tmpfs",
+                "tmpfs", "<MOUNT_POINT>",
+                "-o", "<OPTIONS>"
         };
         sprintf(args_arr[1], "%d", isle_pid);
 
         // make concatenations
         // tmpfs_size
         char *str_arr[] = {"size=", params->tmpfs_size, ",nr_inodes=", params->tmpfs_nr_inodes, ",mode=770"};
-        char tmpfs_size[256];
-        tmpfs_size[0] = '\0';
-        str_array_concat(tmpfs_size, str_arr, 5);
-        strcpy(args_arr[6], tmpfs_size);
+        char options[256];
+        options[0] = '\0';
+        str_array_concat(options, str_arr, 5);
+        strcpy(args_arr[8], options);
 
-//        // nr_inodes
-//        char *str_arr2[] = {args_arr[7], params->tmpfs_nr_inodes};
-//        char tmpfs_nr_inodes[256];
-//        tmpfs_nr_inodes[0] = '\0';
-//        str_array_concat(tmpfs_nr_inodes, str_arr2, 2);
-//        strcpy(args_arr[7], tmpfs_nr_inodes);
-//
         // tmpfs_dst
-        strcpy(args_arr[8], params->tmpfs_dst);
+        strcpy(args_arr[6], params->tmpfs_dst);
 
         char **args = malloc( (NSENTER_TMPFS_ARGS + 2) * sizeof(char*)); // Empty array of pointers
 
         args[0] = victim_name;
-        for (int i = 1; i < NSENTER_TMPFS_ARGS; i++) {
+        for (int i = 1; i < NSENTER_TMPFS_ARGS + 1; i++) {
+            printf("%s\n", args_arr[i - 1]);
             args[i] = args_arr[i - 1];
-        }
-        args[NSENTER_TMPFS_ARGS] = NULL;
-
-        for (int i = 0; i < NSENTER_TMPFS_ARGS; i++) {
             printf("%s\n", args[i]);
         }
+        args[NSENTER_TMPFS_ARGS + 1] = NULL;
 
         // Environment is ready
         execvp(victim_name, args);
