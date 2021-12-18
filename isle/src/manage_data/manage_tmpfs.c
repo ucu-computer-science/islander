@@ -2,7 +2,7 @@
 
 
 
-/** Mount src_dir_path into dest_dir_path **/
+/** Mount tmpfs into dest_dir_path **/
 void mount_ns_tmpfs(int isle_pid, struct process_params *params) {
     pid_t pid = fork();
 
