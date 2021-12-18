@@ -16,6 +16,9 @@ ps:
 install_rootfs:
 	mkdir ./isle/ubuntu-rootfs
 	tar -xvzf ./isle/files/ubuntu-rootfs.tar.gz -C ./isle/ubuntu-rootfs
+	mkdir ./isle/ubuntu-rootfs/test_mnt
+	mkdir ./isle/ubuntu-rootfs/test_tmpfs
+	mkdir ./isle/ubuntu-rootfs/host_dev
 	
 # Create all required dirs.
 create_dirs:

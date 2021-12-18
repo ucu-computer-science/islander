@@ -46,9 +46,7 @@ void mount_ns_tmpfs(int isle_pid, struct process_params *params) {
 
         args[0] = victim_name;
         for (int i = 1; i < NSENTER_TMPFS_ARGS + 1; i++) {
-            printf("%s\n", args_arr[i - 1]);
             args[i] = args_arr[i - 1];
-            printf("%s\n", args[i]);
         }
         args[NSENTER_TMPFS_ARGS + 1] = NULL;
 

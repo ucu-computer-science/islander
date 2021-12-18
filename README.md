@@ -41,6 +41,7 @@ sudo ./islander_engine /bin/bash --volume src test_mnt1 dst ../ubuntu-rootfs/tes
 
 # check results in ~/islander/volumes
 sudo sh -c "cd test_mnt1/; ls"
+sudo sh -c "cat ./test_mnt1/f2.txt"
 
 # example of tmpfs feature usage
 sudo ./islander_engine /bin/bash --device-write-bps 10485760000 --memory-in-bytes 1000M --tmpfs dst ../ubuntu-rootfs/test_tmpfs size 2G nr_inodes 1k --mount src /dev/ dst ../ubuntu-rootfs/host_dev/
@@ -49,6 +50,8 @@ sudo ./islander_engine /bin/bash --device-write-bps 10485760000 --memory-in-byte
 
 ### tmpfs usage
 ```shell
+sudo mount /dev/nvme0n1p5 ~/islander/volumes/
+
 # filter in htop
 
 sudo mount -t tmpfs -o size=2G,nr_inodes=1k,mode=777 tmpfs ./reports

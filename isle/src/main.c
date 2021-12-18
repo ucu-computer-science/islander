@@ -69,7 +69,6 @@ int main(int argc, char **argv) {
     if (child_pid < 0)
         kill_process("Failed to clone: %m\n");
     printf("PID: %ld\n", (long)child_pid);
-    printf("after PID\n");
 
     // Create islenode file for the isle
     if (params.name) {

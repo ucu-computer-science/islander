@@ -173,7 +173,7 @@ void write_file(char path[100], char line[100]) {
 }
 
 
-/* Create file that contains information about the isle itself
+/** Create file that contains information about the isle itself
  * like PID, Name, Time created. */
 void create_islenode(char* isle_name, int isle_pid) {
     // Provide a path for the file that needs to be created
