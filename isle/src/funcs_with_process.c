@@ -11,7 +11,6 @@ void log_process_output(int log_pipe_fd[PIPE_FD_NUM]) {
         fprintf(stderr, "fork Failed");
         exit(EXIT_FAILURE);
     }
-
     else if (pid > 0) {
         // parent process
 //        int merrno_status;
@@ -20,7 +19,7 @@ void log_process_output(int log_pipe_fd[PIPE_FD_NUM]) {
     }
     else {
         // child process
-        printf("Created log process\n");
+        printf("Created log process, PID: %d\n", getpid());
         if (close(log_pipe_fd[PIPE_WRITE])) {
             kill_process("Failed to close write end of log pipe: %m");
         }
@@ -28,14 +27,21 @@ void log_process_output(int log_pipe_fd[PIPE_FD_NUM]) {
         int buf_size = 1024 * 10; // 10 Kb
         char process_log[buf_size];
         int *status;
+        int n_bytes;
         for (;;) {
-            printf("before read_in_buffer\n");
-            read_in_buffer(log_pipe_fd[PIPE_READ], process_log, buf_size, status);
-            printf("after read_in_buffer\n");
+//            printf("before read_in_buffer\n");
+//            read_in_buffer(log_pipe_fd[PIPE_READ], process_log, buf_size, status);
+            read(log_pipe_fd[PIPE_READ], process_log, buf_size);
+//            printf("%d\n", n_bytes);
+//            printf("%s\n", strerror(errno));
+//            printf("after read_in_buffer\n");
             if (process_log[0] == EOF) break;
-            printf("after EOF\n");
+//            printf("after EOF\n");
 
-            printf("Log process output: %s\n", process_log);
+            if (strlen(process_log) > 1) {
+                printf("Log process output: %s\n", process_log);
+            }
+            process_log[0] = '\0'; // clear buffer in case read returns zero
         }
         close(log_pipe_fd[PIPE_READ]);
         exit(0);   // exec never returns
