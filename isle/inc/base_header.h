@@ -49,6 +49,9 @@ struct process_params
     char *tmpfs_dst;
     char *tmpfs_size;
     char *tmpfs_nr_inodes;
+
+    // if container has to have a net namespace
+    bool has_netns;
 };
 
 typedef struct

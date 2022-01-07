@@ -5,6 +5,7 @@
 
 #include "../inc/usernamespace.h"
 #include "../inc/mntnamespace.h"
+#include "../inc/netnamespace.h"
 
 
 static char cmd_stack[STACKSIZE];
@@ -29,12 +30,8 @@ static int child_fn(void *arg) {
 
     char **argv = params->argv;
     char *cmd = argv[0];
-#ifdef DEBUG_MODE
-    printf("child strlen(params->argv) -- %lu\n", sizeof(params->argv) / sizeof(char*));
-    printf("child strlen(cmd) -- %lu\n", strlen(cmd));
-#endif
-    printf("\n\n=========== %s ============\n", cmd);
 
+    printf("\n\n=========== %s ============\n", cmd);
     if (execvp(cmd, argv) == -1)
         kill_process("Failed to exec %s: %m\n", cmd);
 
@@ -62,7 +59,7 @@ int main(int argc, char **argv) {
     int clone_flags =
             // if the command process exits, it leaves an exit status
             // so that we can reap it.
-            SIGCHLD | CLONE_NEWUTS | CLONE_NEWUSER | CLONE_NEWNS | CLONE_NEWPID;
+            SIGCHLD | CLONE_NEWUTS | CLONE_NEWUSER | CLONE_NEWNS | CLONE_NEWPID | CLONE_NEWNET;
     pid_t child_pid = clone(child_fn, cmd_stack + STACKSIZE, clone_flags, &params);
 
     // Kill process if failed to create.
@@ -82,6 +79,11 @@ int main(int argc, char **argv) {
 
     // Set proper namespace mappings to give the ROOT privileges to child process.
     set_userns_mappings(child_pid);
+
+    // Create a network namespace if it has to be created.
+    if (params.has_netns) {
+        set_netns(child_pid);
+    }
 
     // set up cgroup limits
     config_cgroup_limits(child_pid, &res_limits);
