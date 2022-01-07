@@ -43,4 +43,6 @@ void str_array_concat(char *dest_str, char *strings[], int strings_size);
 
 void create_dir(char* subsystem_path);
 
+void create_islenode(char* isle_name, int isle_pid);
+
 #endif //NAMESPACES_HELPER_FUNCTIONS_H

@@ -11,7 +11,9 @@
 #define PIPE_OK_MSG "OK"
 #define PIPE_MSG_SIZE 2
 
-#define SRC_ROOTFS_PATH "../ubuntu-rootfs"
+#define SRC_ROOTFS_PATH "../isle/ubuntu-rootfs"
+#define ISLENODE_DIR_PATH "../isle/islenodes/"
+#define ISLENODE_FORMAT ".txt"
 //#define SRC_VOLUMES_PATH "/var/lib/islander/volumes/"
 #define SRC_VOLUMES_PATH "islander/volumes/"
 #define NSENTER_MNT_ARGS 7
