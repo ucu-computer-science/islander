@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <time.h>
+#include <fcntl.h>              /* Definition of O_* constants */
 
 #include "./defined_vars.h"
 

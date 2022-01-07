@@ -25,6 +25,7 @@ void log_process_output(int log_pipe_fd[PIPE_FD_NUM]) {
         }
         printf("after close(log_pipe_fd[PIPE_WRITE])\n");
         int buf_size = 1024 * 10; // 10 Kb
+//        int buf_size = 20;
         char process_log[buf_size];
         int *status;
         int n_bytes;
@@ -35,11 +36,15 @@ void log_process_output(int log_pipe_fd[PIPE_FD_NUM]) {
 //            printf("%d\n", n_bytes);
 //            printf("%s\n", strerror(errno));
 //            printf("after read_in_buffer\n");
-            if (process_log[0] == EOF) break;
+            if (process_log[0] == EOF) {
+                printf("Log process received EOF\n");
+                break;
+            }
 //            printf("after EOF\n");
 
             if (strlen(process_log) > 1) {
                 printf("Log process output: %s\n", process_log);
+//                printf("LL%s", process_log);
             }
             process_log[0] = '\0'; // clear buffer in case read returns zero
         }

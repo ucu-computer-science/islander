@@ -42,6 +42,8 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
         } else if (strcmp(argv[i], "--device-write-bps") == 0) {
             res_limits->device_write_bps = argv[i + 1];
             i++;
+
+        // detached mode feature
         } else if (strcmp(argv[i], "--detach") == 0 || strcmp(argv[i], "-d") == 0) {
             params->is_detached = true;
 

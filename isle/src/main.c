@@ -37,35 +37,38 @@ static int child_fn(void *arg) {
     printf("after set_userns_ids\n");
 
     // Move process in detach mode
-//    if (params->is_detached == true) {
+    if (params->is_detached == true) {
 
 //        if (close(params->log_pipe_fd[PIPE_READ])) {
 //            kill_process("Failed to close read end of log pipe: %m");
 //        }
-//        printf("before dup2\n");
-//        if (dup2(params->log_pipe_fd[PIPE_WRITE], STDOUT_FILENO) < 0) {
-//            printf("Unable to duplicate STDOUT_FILENO");
-//            exit(EXIT_FAILURE);
-//        }
-//        printf("after dup2 one\n");
-//        if (dup2(params->log_pipe_fd[PIPE_WRITE], STDERR_FILENO) < 0) {
-//            printf("Unable to duplicate STDERR_FILENO");
-//            exit(EXIT_FAILURE);
-//        }
-//        printf("after dup2 two\n");
-//
-//        if (close(params->log_pipe_fd[PIPE_WRITE]) == -1) {
-//            perror("child_fn(): failed to close target_file STDOUT_FILENO");
-//            exit(EXIT_FAILURE);
-//        }
-//
+        printf("before dup2\n");
+        if (dup2(params->log_pipe_fd[PIPE_WRITE], STDOUT_FILENO) < 0) {
+            printf("Unable to duplicate STDOUT_FILENO");
+            exit(EXIT_FAILURE);
+        }
+        printf("after dup2 one\n");
+        if (dup2(params->log_pipe_fd[PIPE_WRITE], STDERR_FILENO) < 0) {
+            printf("Unable to duplicate STDERR_FILENO");
+            exit(EXIT_FAILURE);
+        }
+        printf("after dup2 two\n");
+
+        if (close(params->log_pipe_fd[PIPE_READ])) {
+            kill_process("Failed to close read end of log pipe: %m");
+        }
+        if (close(params->log_pipe_fd[PIPE_WRITE]) == -1) {
+            perror("child_fn(): failed to close target_file STDOUT_FILENO");
+            exit(EXIT_FAILURE);
+        }
+
 //        if (close(STDERR_FILENO) == -1) {
 //            perror("child_fn(): failed to close target_file STDERR_FILENO");
 //            exit(EXIT_FAILURE);
 //        }
 
-    printf("closed stdout and stderr fd\n");
-//    }
+        printf("closed stdout and stderr fd\n");
+    }
 
     char **argv = params->argv;
     char *cmd = argv[0];
@@ -78,18 +81,32 @@ static int child_fn(void *arg) {
     if (execvp(cmd, argv) != 0)
         kill_process("Failed to exec %s: %m\n", cmd);
 
-//    close(params->log_pipe_fd[PIPE_WRITE]);
     printf("child process ended, errno %s\n", strerror(errno));
+    close(params->log_pipe_fd[PIPE_WRITE]);
     kill_process("¯\\_(ツ)_/¯");
     return 1;
 }
 
 
-void run_main_logic(struct process_params* params) {
+void run_main_logic(int argc, char **argv, char *exec_file_path) {
+    // Set Process params such as: PIPE file descriptors and Command to execute.
+    struct process_params params;
+    memset(&params, 0, sizeof(struct process_params));
+
+    // Set default limits for cgroup
+    resource_limits res_limits;
+    set_up_default_limits(&res_limits);
+
+    set_up_default_params(&params);
+
+    parse_args(argc, argv, &params, &res_limits);
+    printf("after parsing\n");
+
     // Create pipe to communicate between main and command process.
     if (pipe(params.pipe_fd) < 0)
         kill_process("Failed to create pipe: %m");
-    if (pipe(params.log_pipe_fd) < 0)
+//    if (pipe2(params.log_pipe_fd, O_DIRECT) < 0)
+    if (pipe2(params.log_pipe_fd, O_NONBLOCK) < 0)
         kill_process("Failed to create log pipe: %m");
 
     // Clone command process.
@@ -121,7 +138,7 @@ void run_main_logic(struct process_params* params) {
 //    config_cgroup_limits(child_pid, &res_limits);
 
     // create log process
-//    if (params.is_detached == true) log_process_output(params.log_pipe_fd);
+    if (params.is_detached == true) log_process_output(params.log_pipe_fd);
     printf("send message to child\n");
 
     // Signal to the command process we're done with setup.
@@ -132,24 +149,10 @@ void run_main_logic(struct process_params* params) {
         kill_process("Failed to close pipe: %m");
     }
 
-    enable_features(child_pid, &params, argv[0]);
+    enable_features(child_pid, &params, exec_file_path);
 
-    if (params.is_detached == false) {
-        if (waitpid(child_pid, NULL, 0) == -1) {
-            kill_process("Failed to wait pid %d: %m\n", child_pid);
-        }
-    } else {
-        pid_t pid = fork();
-
-        if (pid < 0) {
-            fprintf(stderr, "fork Failed");
-            exit(EXIT_FAILURE);
-        }
-        else if (pid == 0) {
-            if (waitpid(child_pid, NULL, 0) == -1) {
-                kill_process("Failed to wait pid %d: %m\n", child_pid);
-            }
-        }
+    if (waitpid(child_pid, NULL, 0) == -1) {
+        kill_process("Failed to wait pid %d: %m\n", child_pid);
     }
 
 //    release_resources(child_pid, &params);
@@ -161,20 +164,27 @@ int main(int argc, char **argv) {
 //    int argc = 2;
 //    char *argv[] = {"./islander_engine", "/bin/bash"};
     printf("PID of islander_engine: %d\n", getpid());
+    bool is_detached = false;
+    for (int i = 1; i < argc; i++) {
+         if (strcmp(argv[i], "--detach") == 0 || strcmp(argv[i], "-d") == 0) {
+            is_detached = true;
+            break;
+         }
+    }
 
-    // Set Process params such as: PIPE file descriptors and Command to execute.
-    struct process_params params;
-    memset(&params, 0, sizeof(struct process_params));
+    if (is_detached) {
+        pid_t pid = fork();
 
-    // Set default limits for cgroup
-    resource_limits res_limits;
-    set_up_default_limits(&res_limits);
-
-    set_up_default_params(&params);
-
-    parse_args(argc, argv, &params, &res_limits);
-    printf("after parsing\n");
-
-    run_main_logic();
+        if (pid < 0) {
+            fprintf(stderr, "fork Failed");
+            exit(EXIT_FAILURE);
+        }
+        else if (pid == 0) {
+            // child process
+            run_main_logic(argc, argv, argv[0]);
+        }
+    } else {
+        run_main_logic(argc, argv, argv[0]);
+    }
     return 0;
 }
