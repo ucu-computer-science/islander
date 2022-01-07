@@ -29,6 +29,7 @@ struct process_params
     int log_pipe_fd[PIPE_FD_NUM];
     char **argv;
     int argc;
+    bool is_detached;
 
     // vars for islenode
     char* name;

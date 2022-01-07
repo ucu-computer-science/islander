@@ -14,9 +14,9 @@ void log_process_output(int log_pipe_fd[PIPE_FD_NUM]) {
 
     else if (pid > 0) {
         // parent process
-        int merrno_status;
-        waitpid(pid, &merrno_status, 0);
-        printf("Parent in log_process_output(): child stopped, exit code %d\n", merrno_status);
+//        int merrno_status;
+//        waitpid(pid, &merrno_status, 0);
+//        printf("Parent in log_process_output(): child stopped, exit code %d\n", merrno_status);
     }
     else {
         // child process
@@ -24,16 +24,20 @@ void log_process_output(int log_pipe_fd[PIPE_FD_NUM]) {
         if (close(log_pipe_fd[PIPE_WRITE])) {
             kill_process("Failed to close write end of log pipe: %m");
         }
-
+        printf("after close(log_pipe_fd[PIPE_WRITE])\n");
         int buf_size = 1024 * 10; // 10 Kb
         char process_log[buf_size];
         int *status;
         for (;;) {
+            printf("before read_in_buffer\n");
             read_in_buffer(log_pipe_fd[PIPE_READ], process_log, buf_size, status);
+            printf("after read_in_buffer\n");
             if (process_log[0] == EOF) break;
+            printf("after EOF\n");
 
             printf("Log process output: %s\n", process_log);
         }
+        close(log_pipe_fd[PIPE_READ]);
         exit(0);   // exec never returns
     }
 }

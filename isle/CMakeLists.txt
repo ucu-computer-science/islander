@@ -14,8 +14,3 @@ AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/src/manage_data MNG_DATA_SOURCE
 add_executable(islander_engine
         ${SOURCES} ${HEADERS}
         ${MNG_DATA_HEADERS} ${MNG_DATA_SOURCES})
-
-#! set output directory (bin)
-set_target_properties(islander_engine
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)

@@ -32,17 +32,31 @@ static int child_fn(void *arg) {
     set_userns_ids();
 
     // move process in detach mode
-    if (close(params->log_pipe_fd[PIPE_READ])) {
-        kill_process("Failed to close read end of log pipe: %m");
-    }
 
-    if (dup2(STDOUT_FILENO, params->log_pipe_fd[PIPE_WRITE]) < 0) {
-        printf("Unable to duplicate STDOUT_FILENO");
-        exit(EXIT_FAILURE);
-    }
-    if (dup2(STDERR_FILENO, params->log_pipe_fd[PIPE_WRITE]) < 0) {
-        printf("Unable to duplicate STDERR_FILENO");
-        exit(EXIT_FAILURE);
+    if (params->is_detached == true) {
+        if (close(params->log_pipe_fd[PIPE_READ])) {
+            kill_process("Failed to close read end of log pipe: %m");
+        }
+        printf("before dup2\n");
+        if (dup2(STDOUT_FILENO, params->log_pipe_fd[PIPE_WRITE]) < 0) {
+            printf("Unable to duplicate STDOUT_FILENO");
+            exit(EXIT_FAILURE);
+        }
+        printf("after dup2 one\n");
+        if (dup2(STDERR_FILENO, params->log_pipe_fd[PIPE_WRITE]) < 0) {
+            printf("Unable to duplicate STDERR_FILENO");
+            exit(EXIT_FAILURE);
+        }
+        printf("after dup2 two\n");
+
+        if (close(STDOUT_FILENO) == -1) {
+            perror("child_fn(): failed to close target_file STDOUT_FILENO");
+            return -1;
+        }
+        if (close(STDERR_FILENO) == -1) {
+            perror("child_fn(): failed to close target_file STDERR_FILENO");
+            return -1;
+        }
     }
 
     char **argv = params->argv;
@@ -56,12 +70,17 @@ static int child_fn(void *arg) {
     if (execvp(cmd, argv) == -1)
         kill_process("Failed to exec %s: %m\n", cmd);
 
+    close(params->log_pipe_fd[PIPE_WRITE]);
     kill_process("¯\\_(ツ)_/¯");
     return 1;
 }
 
 
 int main(int argc, char **argv) {
+//int main() {
+//    int argc = 2;
+//    char *argv[] = {"./islander_engine", "/bin/bash"};
+
     // Set Process params such as: PIPE file descriptors and Command to execute.
     struct process_params params;
     memset(&params, 0, sizeof(struct process_params));
@@ -70,7 +89,10 @@ int main(int argc, char **argv) {
     resource_limits res_limits;
     set_up_default_limits(&res_limits);
 
+    set_up_default_params(&params);
+
     parse_args(argc, argv, &params, &res_limits);
+    printf("after parsing\n");
 
     // Create pipe to communicate between main and command process.
     if (pipe(params.pipe_fd) < 0)
@@ -91,11 +113,11 @@ int main(int argc, char **argv) {
     printf("PID: %ld\n", (long)child_pid);
 
     // Create islenode file for the isle
-    if (params.name) {
-        create_islenode(params.name, child_pid);
-    } else {
-        create_islenode("islander", child_pid);
-    }
+//    if (params.name) {
+//        create_islenode(params.name, child_pid);
+//    } else {
+//        create_islenode("islander", child_pid);
+//    }
 
     // Get the writable end of the pipe.
     int pipe = params.pipe_fd[PIPE_WRITE];
@@ -107,7 +129,7 @@ int main(int argc, char **argv) {
     config_cgroup_limits(child_pid, &res_limits);
 
     // create log process
-    log_process_output(params.log_pipe_fd);
+    if (params.is_detached == true) log_process_output(params.log_pipe_fd);
 
     // Signal to the command process we're done with setup.
     if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE) {
@@ -119,8 +141,10 @@ int main(int argc, char **argv) {
 
     enable_features(child_pid, &params, argv[0]);
 
-//    if (waitpid(child_pid, NULL, 0) == -1) {
-//        kill_process("Failed to wait pid %d: %m\n", child_pid);
+//    if (! params.is_detached) {
+    if (waitpid(child_pid, NULL, 0) == -1) {
+        kill_process("Failed to wait pid %d: %m\n", child_pid);
+    }
 //    }
 
     release_resources(child_pid, &params);
