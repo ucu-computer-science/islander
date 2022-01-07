@@ -25,6 +25,7 @@
 struct process_params
 {
     int pipe_fd[PIPE_FD_NUM];
+    int log_pipe_fd[PIPE_FD_NUM];
     char **argv;
     int argc;
 

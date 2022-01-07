@@ -1,6 +1,10 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "../inc/base_header.h"
 #include "../inc/cgroup_functions.h"
 #include "../inc/helper_functions.h"
+#include "../inc/funcs_with_process.h"
 #include "../inc/manage_data/manage_mount.h"
 
 #include "../inc/usernamespace.h"
@@ -26,6 +30,20 @@ static int child_fn(void *arg) {
     // drop superuser privileges if any by enforcing
     // the exec'ed process runs with UID 0.
     set_userns_ids();
+
+    // move process in detach mode
+    if (close(params->log_pipe_fd[PIPE_READ])) {
+        kill_process("Failed to close read end of log pipe: %m");
+    }
+
+    if (dup2(STDOUT_FILENO, params->log_pipe_fd[PIPE_WRITE]) < 0) {
+        printf("Unable to duplicate STDOUT_FILENO");
+        exit(EXIT_FAILURE);
+    }
+    if (dup2(STDERR_FILENO, params->log_pipe_fd[PIPE_WRITE]) < 0) {
+        printf("Unable to duplicate STDERR_FILENO");
+        exit(EXIT_FAILURE);
+    }
 
     char **argv = params->argv;
     char *cmd = argv[0];
@@ -57,6 +75,8 @@ int main(int argc, char **argv) {
     // Create pipe to communicate between main and command process.
     if (pipe(params.pipe_fd) < 0)
         kill_process("Failed to create pipe: %m");
+    if (pipe(params.log_pipe_fd) < 0)
+        kill_process("Failed to create log pipe: %m");
 
     // Clone command process.
     int clone_flags =
@@ -69,7 +89,6 @@ int main(int argc, char **argv) {
     if (child_pid < 0)
         kill_process("Failed to clone: %m\n");
     printf("PID: %ld\n", (long)child_pid);
-    printf("after PID\n");
 
     // Get the writable end of the pipe.
     int pipe = params.pipe_fd[PIPE_WRITE];
@@ -79,6 +98,9 @@ int main(int argc, char **argv) {
 
     // set up cgroup limits
     config_cgroup_limits(child_pid, &res_limits);
+
+    // create log process
+    log_process_output(params.log_pipe_fd);
 
     // Signal to the command process we're done with setup.
     if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE) {
@@ -90,9 +112,9 @@ int main(int argc, char **argv) {
 
     enable_features(child_pid, &params, argv[0]);
 
-    if (waitpid(child_pid, NULL, 0) == -1) {
-        kill_process("Failed to wait pid %d: %m\n", child_pid);
-    }
+//    if (waitpid(child_pid, NULL, 0) == -1) {
+//        kill_process("Failed to wait pid %d: %m\n", child_pid);
+//    }
 
     release_resources(child_pid, &params);
     return 0;
