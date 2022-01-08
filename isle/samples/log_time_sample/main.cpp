@@ -11,9 +11,8 @@ int main()
     {
         // delay for NUM_SECONDS seconds
         for(i = 0 ; i < NUM_SECONDS ; i++) { usleep(1000 * 1000); }
-        printf("stdout %d\n", STDOUT_FILENO);
-        printf("stderr %d\n", STDERR_FILENO);
         printf("Second %d\n", count++);
+        fflush(stdout);
     }
     return 0;
 }

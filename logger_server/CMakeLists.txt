@@ -1,0 +1,9 @@
+cmake_minimum_required(VERSION 3.16)
+project(logger_server C)
+
+set(CMAKE_C_STANDARD 99)
+
+AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/inc HEADERS)
+AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/src SOURCES)
+
+add_executable(logger_server ${SOURCES} ${HEADERS})

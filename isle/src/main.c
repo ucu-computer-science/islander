@@ -4,7 +4,7 @@
 #include "../inc/base_header.h"
 #include "../inc/cgroup_functions.h"
 #include "../inc/helper_functions.h"
-#include "../inc/funcs_with_process.h"
+#include "../inc/logger_interaction/server_interaction.h"
 #include "../inc/manage_data/manage_mount.h"
 
 #include "../inc/usernamespace.h"
@@ -38,27 +38,23 @@ static int child_fn(void *arg) {
 
     // Move process in detach mode
     if (params->is_detached == true) {
-
 //        if (close(params->log_pipe_fd[PIPE_READ])) {
 //            kill_process("Failed to close read end of log pipe: %m");
 //        }
         printf("before dup2\n");
-        if (dup2(params->log_pipe_fd[PIPE_WRITE], STDOUT_FILENO) < 0) {
+        if (dup2(params->sfd, STDOUT_FILENO) < 0) {
             printf("Unable to duplicate STDOUT_FILENO");
             exit(EXIT_FAILURE);
         }
         printf("after dup2 one\n");
-        if (dup2(params->log_pipe_fd[PIPE_WRITE], STDERR_FILENO) < 0) {
+        if (dup2(params->sfd, STDERR_FILENO) < 0) {
             printf("Unable to duplicate STDERR_FILENO");
             exit(EXIT_FAILURE);
         }
         printf("after dup2 two\n");
 
-        if (close(params->log_pipe_fd[PIPE_READ])) {
-            kill_process("Failed to close read end of log pipe: %m");
-        }
-        if (close(params->log_pipe_fd[PIPE_WRITE]) == -1) {
-            perror("child_fn(): failed to close target_file STDOUT_FILENO");
+        if (close(params->sfd) == -1) {
+            perror("child_fn(): failed to close socket fd");
             exit(EXIT_FAILURE);
         }
 
@@ -82,7 +78,7 @@ static int child_fn(void *arg) {
         kill_process("Failed to exec %s: %m\n", cmd);
 
     printf("child process ended, errno %s\n", strerror(errno));
-    close(params->log_pipe_fd[PIPE_WRITE]);
+//    close(params->log_pipe_fd[PIPE_WRITE]);
     kill_process("¯\\_(ツ)_/¯");
     return 1;
 }
@@ -106,8 +102,11 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
     if (pipe(params.pipe_fd) < 0)
         kill_process("Failed to create pipe: %m");
 //    if (pipe2(params.log_pipe_fd, O_DIRECT) < 0)
-    if (pipe2(params.log_pipe_fd, O_NONBLOCK) < 0)
-        kill_process("Failed to create log pipe: %m");
+//    if (pipe2(params.log_pipe_fd, O_NONBLOCK) < 0)
+//        kill_process("Failed to create log pipe: %m");
+    if (params.is_detached) {
+        params.sfd = connect_to_process_logger();
+    }
 
     // Clone command process.
     int clone_flags =
@@ -138,8 +137,8 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
 //    config_cgroup_limits(child_pid, &res_limits);
 
     // create log process
-    if (params.is_detached == true) log_process_output(params.log_pipe_fd);
-    printf("send message to child\n");
+//    if (params.is_detached == true) log_process_output(params.log_pipe_fd);
+//    printf("send message to child\n");
 
     // Signal to the command process we're done with setup.
     if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE) {
