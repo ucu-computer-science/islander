@@ -1,0 +1,7 @@
+Currently logging to "gdb.txt".
+Future logs will be written to my_god_object.log.
+Logs will be appended to the log file.
+Output will be logged and displayed.
+Debug output will be logged and displayed.
+Detaching from program: target:/project_bin/log_time_sample, process 59173
+[Inferior 1 (process 59173) detached]

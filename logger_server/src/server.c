@@ -44,9 +44,11 @@ int run_server(int argc, char *argv[]) {
     }
 
     ssize_t numRead;
+    pid_t pid;
     char buf[BUF_SIZE];
-    for (;;) {          /* Handle client connections iteratively */
-
+    int children_pids[MAX_USERS];
+    int pid_idx = 0;
+    for (;;) {
         // Accept a connection. The connection is returned on a NEW
         // socket, 'cfd'; the listening socket ('sfd') remains open
         // and can be used to accept further connections. */
@@ -55,24 +57,45 @@ int run_server(int argc, char *argv[]) {
         int cfd = accept(sfd, NULL, NULL);
         printf("Accepted socket fd = %d\n", cfd);
 
-        //
-        // Transfer data from connected socket to stdout until EOF */
-        //
+        // Create a separate process to handle the new client
+        pid = fork();
 
-        // Read at most BUF_SIZE bytes from the socket into buf.
-        while ((numRead = read(cfd, buf, BUF_SIZE)) > 0) {
-            // Then, write those bytes from buf into STDOUT.
-            if (write(STDOUT_FILENO, buf, numRead) != numRead) {
-                fatal("partial/failed write");
+        if (pid == -1) {
+            perror("fork");
+            exit_gracefully(children_pids, sfd, EXIT_FAILURE, pid_idx);
+        }
+        else if (pid == 0) {
+            //
+            // Transfer data from connected socket to stdout until EOF */
+            //
+            printf("Log process PID: %d\n", getpid());
+            fflush(stdout);
+
+            // Read at most BUF_SIZE bytes from the socket into buf.
+            while ((numRead = read(cfd, buf, BUF_SIZE)) > 0) {
+                printf("INFO: ");
+                fflush(stdout);
+                // Then, write those bytes from buf into STDOUT.
+                if (write(STDOUT_FILENO, buf, numRead) != numRead) {
+                    fatal("partial/failed write");
+                }
+            }
+
+            if (numRead == -1) {
+                errExit("read");
             }
         }
-
-        if (numRead == -1) {
-            errExit("read");
-        }
-
-        if (close(cfd) == -1) {
-            errMsg("close");
-        }
+        children_pids[pid_idx++] = cfd;
     }
+}
+
+
+/* Function to exit the main server process.
+ * It kills all children processes that were created by the server and it also closes the parent socket fd */
+void exit_gracefully(int *children_pids, int socket_desc, int exit_code, int n_pids) {
+    printf("\nServer shutting down...\n\n");
+    for (int i = 0; i < n_pids; i++)
+        kill(children_pids[i], SIGTERM);  // Kill all children :=(
+    close(socket_desc);  // Close parent socket fd
+    exit(exit_code);  // Goodbye!
 }

@@ -57,6 +57,8 @@ static int child_fn(void *arg) {
             perror("child_fn(): failed to close socket fd");
             exit(EXIT_FAILURE);
         }
+        setvbuf(stdout, NULL, _IONBF, 0);
+        setvbuf(stderr, NULL, _IONBF, 0);
 
 //        if (close(STDERR_FILENO) == -1) {
 //            perror("child_fn(): failed to close target_file STDERR_FILENO");
@@ -154,7 +156,7 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
         kill_process("Failed to wait pid %d: %m\n", child_pid);
     }
 
-//    release_resources(child_pid, &params);
+    release_resources(child_pid, &params);
 }
 
 
