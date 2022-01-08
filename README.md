@@ -20,10 +20,19 @@ For more details we recommend to look in section 3 of RedHat documentation about
 
 ## Container management
 
-### Container detached mode
+### Attach to detached container
+
+Manual approach for debugging:
 ```shell
+# run logger_server to save containers output
+sudo ./logger_server
+
+# start container in detached mode;
 # binary file path is based on ubuntu-root-fs as root dir
 sudo ./islander_engine ./project_bin/log_time_sample -d
+
+# attach to process and redirect stdout and stderr in special tty (change tty for your needs)
+sudo gdb -p 70235 -x process_attach
 ```
 
 

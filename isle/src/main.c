@@ -20,52 +20,40 @@ static int child_fn(void *arg) {
 
     struct process_params *params = (struct process_params*) arg;
 
-    printf("before await_setup\n");
-
     // Wait for 'setup done' signal from the main process.
     await_setup(params->pipe_fd[PIPE_READ]);
-    printf("after await_setup\n");
 
     setup_mntns(SRC_ROOTFS_PATH);
-    printf("after setup_mntns\n");
 
     // Assuming, 0 in the current namespace maps to
     // a non-privileged UID in the parent namespace,
     // drop superuser privileges if any by enforcing
     // the exec'ed process runs with UID 0.
     set_userns_ids();
-    printf("after set_userns_ids\n");
 
     // Move process in detach mode
     if (params->is_detached == true) {
-//        if (close(params->log_pipe_fd[PIPE_READ])) {
-//            kill_process("Failed to close read end of log pipe: %m");
-//        }
-        printf("before dup2\n");
+        // redirect stdout and stderr into UNIX domain socket
         if (dup2(params->sfd, STDOUT_FILENO) < 0) {
             printf("Unable to duplicate STDOUT_FILENO");
             exit(EXIT_FAILURE);
         }
-        printf("after dup2 one\n");
         if (dup2(params->sfd, STDERR_FILENO) < 0) {
             printf("Unable to duplicate STDERR_FILENO");
             exit(EXIT_FAILURE);
         }
-        printf("after dup2 two\n");
 
         if (close(params->sfd) == -1) {
             perror("child_fn(): failed to close socket fd");
             exit(EXIT_FAILURE);
         }
+
+        // Some commands like printf can buffers, so in that case we can not get live stream.
+        // Hence, we need to change size of that printf buffer.
         setvbuf(stdout, NULL, _IONBF, 0);
         setvbuf(stderr, NULL, _IONBF, 0);
 
-//        if (close(STDERR_FILENO) == -1) {
-//            perror("child_fn(): failed to close target_file STDERR_FILENO");
-//            exit(EXIT_FAILURE);
-//        }
-
-        printf("closed stdout and stderr fd\n");
+        printf("Detached mode configured\n");
     }
 
     char **argv = params->argv;
@@ -79,8 +67,7 @@ static int child_fn(void *arg) {
     if (execvp(cmd, argv) != 0)
         kill_process("Failed to exec %s: %m\n", cmd);
 
-    printf("child process ended, errno %s\n", strerror(errno));
-//    close(params->log_pipe_fd[PIPE_WRITE]);
+    printf("Child process ended, errno %s\n", strerror(errno));
     kill_process("¯\\_(ツ)_/¯");
     return 1;
 }
@@ -94,18 +81,15 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
     // Set default limits for cgroup
     resource_limits res_limits;
     set_up_default_limits(&res_limits);
-
     set_up_default_params(&params);
 
     parse_args(argc, argv, &params, &res_limits);
-    printf("after parsing\n");
 
     // Create pipe to communicate between main and command process.
     if (pipe(params.pipe_fd) < 0)
         kill_process("Failed to create pipe: %m");
-//    if (pipe2(params.log_pipe_fd, O_DIRECT) < 0)
-//    if (pipe2(params.log_pipe_fd, O_NONBLOCK) < 0)
-//        kill_process("Failed to create log pipe: %m");
+
+    // Get UNIX socket fd. Note that process_logger should be already running.
     if (params.is_detached) {
         params.sfd = connect_to_process_logger();
     }
@@ -120,7 +104,7 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
     // Kill process if failed to create.
     if (child_pid < 0)
         kill_process("Failed to clone: %m\n");
-    printf("PID: %ld\n", (long)child_pid);
+    printf("Container process PID: %ld\n", (long)child_pid);
 
     // Create islenode file for the isle
 //    if (params.name) {
@@ -135,12 +119,8 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
     // Set proper namespace mappings to give the ROOT privileges to child process.
     set_userns_mappings(child_pid);
 
-    // set up cgroup limits
+    // Set up cgroup limits
 //    config_cgroup_limits(child_pid, &res_limits);
-
-    // create log process
-//    if (params.is_detached == true) log_process_output(params.log_pipe_fd);
-//    printf("send message to child\n");
 
     // Signal to the command process we're done with setup.
     if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE) {
@@ -161,9 +141,6 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
 
 
 int main(int argc, char **argv) {
-//int main() {
-//    int argc = 2;
-//    char *argv[] = {"./islander_engine", "/bin/bash"};
     printf("PID of islander_engine: %d\n", getpid());
     bool is_detached = false;
     for (int i = 1; i < argc; i++) {
@@ -174,6 +151,10 @@ int main(int argc, char **argv) {
     }
 
     if (is_detached) {
+        // To run in detached mode we need to create a new process before starting run_main_logic,
+        // since to create our container we use clone syscall, so parent process in any case
+        // need make waitpid based on clone semantic
+        // (look at https://codesteps.com/2014/05/19/c-programming-creating-a-child-process-using-clone/)
         pid_t pid = fork();
 
         if (pid < 0) {

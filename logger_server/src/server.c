@@ -1,6 +1,6 @@
 #include "../inc/server.h"
 
-
+/** Run multi-client server, which logs container output */
 int run_server(int argc, char *argv[]) {
     struct sockaddr_un addr;
 
@@ -57,7 +57,7 @@ int run_server(int argc, char *argv[]) {
         int cfd = accept(sfd, NULL, NULL);
         printf("Accepted socket fd = %d\n", cfd);
 
-        // Create a separate process to handle the new client
+        // Create a separate process to handle a new client
         pid = fork();
 
         if (pid == -1) {
