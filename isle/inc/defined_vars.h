@@ -15,9 +15,19 @@
 #define SRC_ROOTFS_PATH "../ubuntu-rootfs"
 //#define ISLENODE_DIR_PATH "../isle/islenodes/"
 #define ISLENODE_DIR_PATH "~/islander/islenodes/"
-#define ISLENODE_FORMAT ".txt"
 //#define SRC_VOLUMES_PATH "/var/lib/islander/volumes/"
 #define SRC_VOLUMES_PATH "islander/volumes/"
+#define ISLANDER_HOME_PREFIX "islander/"
+#define ISLANDER_BIN_PATH "../../bin/"
+#define REMOTE_VLM_MANAGER_NAME "remote-vlm-manager"
+
+// vars for remote volumes
+#define SECRETS_PREFIX "remote-volumes/cloud_secrets/"
+#define AWS_SECRETS_NAME "s3_secrets.txt"
+#define S3_BUCKET_PATH "remote-volumes/s3_buckets/"
+
+
+#define ISLENODE_FORMAT ".txt"
 #define NSENTER_MNT_ARGS 7
 #define NSENTER_VLM_ARGS 8
 #define NSENTER_TMPFS_ARGS 9

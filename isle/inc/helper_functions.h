@@ -12,6 +12,7 @@
 #include "./manage_data/manage_mount.h"
 #include "./manage_data/manage_volumes.h"
 #include "./manage_data/manage_tmpfs.h"
+#include "./manage_data/manage_remote_volumes.h"
 
 #define PIPE_FD_NUM 2
 #define PIPE_OK_MSG "OK"
@@ -36,6 +37,12 @@ void enable_features(int isle_pid, struct process_params *params, const char *ex
 void release_resources(int isle_pid, struct process_params *params);
 
 void write_file(char path[100], char line[100]);
+
+void get_islander_home(char *islander_home_path, const char *exec_file_path);
+
+void get_aws_secrets_path(char *aws_secrets_path, const char *exec_file_path);
+
+void exec_bash_cmd(char *cmd);
 
 void await_setup(int pipe);
 
