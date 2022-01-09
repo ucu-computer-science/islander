@@ -6,6 +6,7 @@
 
 #define MNT_FREQUENCY 5.0
 
+
 void parse_args(int argc, char** argv, struct process_params *params, resource_limits *res_limits) {
     if (argc < 2) exit(0);
 
@@ -204,9 +205,7 @@ void write_file(char path[100], char line[100]) {
 void create_islenode(char* isle_name, int isle_pid) {
     // Provide a path for the file that needs to be created
     char file_name[strlen(ISLENODE_DIR_PATH) + strlen(isle_name) + strlen(ISLENODE_FORMAT) + 1];
-//    file_name[0] = '\0';
-    sprintf(file_name, "%s%s%s", ISLENODE_DIR_PATH, isle_name, ISLENODE_FORMAT);
-    printf("file_name -- %s", file_name);
+    sprintf(file_name, "%s/%s.%s", ISLENODE_DIR_PATH, isle_name, ISLENODE_FORMAT);
 
     // Create file.
     FILE* file = fopen(file_name, "w");
@@ -214,7 +213,6 @@ void create_islenode(char* isle_name, int isle_pid) {
     time_t t;
     time(&t);
     char* time = ctime(&t);
-    printf("file_name2 -- %s", file_name);
     // Write isle parameters to the associated file separated with \n
     fprintf(file, "%d\n%s\n%s", isle_pid, isle_name, time);
     fclose(file);

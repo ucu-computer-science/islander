@@ -14,9 +14,9 @@
 //#define SRC_ROOTFS_PATH "../isle/ubuntu-rootfs"
 #define SRC_ROOTFS_PATH "../ubuntu-rootfs"
 //#define ISLENODE_DIR_PATH "../isle/islenodes/"
-#define ISLENODE_DIR_PATH "~/islander/islenodes/"
+#define ISLENODE_DIR_PATH "/home/yaroslav_morozevych/islander/islenodes"
 
-#define ISLENODE_FORMAT ".txt"
+#define ISLENODE_FORMAT "txt"
 //#define SRC_VOLUMES_PATH "/var/lib/islander/volumes/"
 #define SRC_VOLUMES_PATH "islander/volumes/"
 #define NSENTER_MNT_ARGS 7
