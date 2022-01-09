@@ -14,6 +14,7 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
     params->mnt_dst = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
     params->vlm_src = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
     params->vlm_dst = calloc((int)(argc / MNT_FREQUENCY), sizeof(char*));
+    params->has_netns = false;
 
     // Split argv on limits for cgroup and arguments for command,
     // which will be executed via execvp()
@@ -73,6 +74,15 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
         } else if (strcmp(argv[i], "--name") == 0) {
             params->name = argv[i + 1];
             i++;
+
+        // check if container has net namespace
+        } else if (strcmp(argv[i], "--netns") == 0) {
+            if (strcmp(argv[i + 1], "True") == 0)
+                params->has_netns = true;
+            else
+                params->has_netns = false;
+            i++;
+
         } else {
             command_args[arg_idx] = argv[i];
             arg_idx++;
