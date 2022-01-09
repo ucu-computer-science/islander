@@ -104,6 +104,7 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
     // Kill process if failed to create.
     if (child_pid < 0)
         kill_process("Failed to clone: %m\n");
+
     printf("Container process PID: %ld\n", (long)child_pid);
 
     // Create islenode file for the isle
