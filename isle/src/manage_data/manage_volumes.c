@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #include "../../inc/base_header.h"
 #include "../../inc/helper_functions.h"
 #include "../../inc/manage_data/manage_volumes.h"
