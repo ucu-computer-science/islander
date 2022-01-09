@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
 #define _XOPEN_SOURCE 500
 #include <sys/stat.h>
 #include <ftw.h>
