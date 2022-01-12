@@ -84,7 +84,7 @@ void unmount_ns_dir(int isle_pid, char* dest_dir_path) {
         // Here we use nsenter to enter namespace and make umount command inside it.
         char victim_name[] = "nsenter";
 
-        char args_arr[NSENTER_UNMNT_ARGS][16] = {
+        char args_arr[NSENTER_UNMNT_ARGS][256] = {
                 "-t", "isle_pid_str", "umount",
                 "-R", "dest_dir_path"
         };

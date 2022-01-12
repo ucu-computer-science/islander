@@ -126,6 +126,7 @@ void release_resources(int isle_pid, struct process_params *params) {
     if (params->is_mount) unmount_dirs(isle_pid, params);
     if (params->is_volume) unmount_volumes(isle_pid, params);
     if (params->is_tmpfs) unmount_ns_dir(isle_pid, params->tmpfs_dst);
+    if (params->remote_vlm.is_mount_aws) unmount_ns_dir(isle_pid, params->remote_vlm.mnt_aws_dst);
 //    rm_cgroup_dirs(isle_pid);
 
     free(params->argv);
@@ -133,6 +134,53 @@ void release_resources(int isle_pid, struct process_params *params) {
     free(params->mnt_dst);
     free(params->vlm_src);
     free(params->vlm_dst);
+}
+
+
+// Function source -- https://www.techiedelight.com/implement-substr-function-c/
+// Following function extracts characters present in `src`
+// between `m` and `n` (excluding `n`)
+char* substr(const char *src, int m, int n) {
+    // get the length of the destination string
+    int len = n - m;
+
+    // allocate (len + 1) chars for destination (+1 for extra null character)
+    char *dest = (char*)malloc(sizeof(char) * (len + 1));
+
+    // start with m'th char and copy `len` chars into the destination
+    strncpy(dest, (src + m), len);
+
+    // return the destination string
+    return dest;
+}
+
+
+char* get_username() {
+    const char *exec_path;
+    char cwd[256];
+    getcwd(cwd, 256);
+    exec_path = cwd;
+    printf("exec_path -- %s\n", exec_path);
+    printf("bool exec_path -- %d\n", exec_path[0] == '/');
+
+    // get substring with user host path
+    uint count = 0;
+    uint substr_start = 0;
+    uint substr_end = strlen(exec_path);
+    for (uint i = 0; i < strlen(exec_path); i++) {
+        if (exec_path[i] == '/') {
+            count++;
+            if (count == 2) {
+                substr_start = i + 1;
+            } else if (count == 3) {
+                substr_end = i;
+                break;
+            }
+        }
+    }
+    printf("substr_start -- %d, substr_end -- %d\n", substr_start, substr_end);
+
+    return substr(exec_path, substr_start, substr_end);
 }
 
 
@@ -175,7 +223,6 @@ void get_islander_home(char *islander_home_path, const char *exec_file_path) {
     islander_home_path2[0] = '\0';
     str_array_concat(islander_home_path2, str_arr, 2);
     strcpy(islander_home_path, islander_home_path2);
-//    islander_home_path = islander_home_path2;
 }
 
 

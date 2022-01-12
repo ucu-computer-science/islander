@@ -36,7 +36,11 @@ void enable_features(int isle_pid, struct process_params *params, const char *ex
 
 void release_resources(int isle_pid, struct process_params *params);
 
+char* substr(const char *src, int m, int n);
+
 void write_file(char path[100], char line[100]);
+
+char* get_username();
 
 void get_islander_home(char *islander_home_path, const char *exec_file_path);
 

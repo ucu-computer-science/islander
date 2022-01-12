@@ -32,6 +32,7 @@
 #define NSENTER_VLM_ARGS 8
 #define NSENTER_TMPFS_ARGS 9
 #define NSENTER_UNMNT_ARGS 6
+#define NSENTER_CLOUD_UNMNT_ARGS 2
 
 // error codes
 #define SUCCESS 0
