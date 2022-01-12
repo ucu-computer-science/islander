@@ -126,9 +126,8 @@ void release_resources(int isle_pid, struct process_params *params) {
     if (params->is_mount) unmount_dirs(isle_pid, params);
     if (params->is_volume) unmount_volumes(isle_pid, params);
     if (params->is_tmpfs) unmount_ns_dir(isle_pid, params->tmpfs_dst);
-    if (params->remote_vlm.is_mount_aws) {
-        umount_cloud_dir(isle_pid, params->remote_vlm.mnt_aws_dst);
-    }
+    if (params->remote_vlm.is_mount_aws) umount_cloud_dir(isle_pid, params->remote_vlm.mnt_aws_dst);
+
 //    rm_cgroup_dirs(isle_pid);
 
     free(params->argv);
