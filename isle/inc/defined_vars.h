@@ -34,6 +34,8 @@
 #define NSENTER_UNMNT_ARGS 6
 #define NSENTER_CLOUD_UNMNT_ARGS 2
 
+#define MAX_PATH_LENGTH 256
+
 // error codes
 #define SUCCESS 0
 #define OPEN_FILE_ERR -2
