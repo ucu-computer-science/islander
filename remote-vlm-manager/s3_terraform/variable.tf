@@ -1,12 +1,11 @@
 variable "bucket_name" {
-    # default = "os-project-test"
 }
 variable "aws_access_key" {
-    default = "AKIATFSTWZLF7L56MUBL"
+    default = "<YOUR-ACCESS-KEY>"
 }
 variable "aws_secret_key" {
-    default = "d4vHXdwu8rHck+RI5g8UytF5wB1gRTQ0ISD3WUfR"
+    default = "<YOUR-SECRET-KEY>"
  }
 variable "region" {
-    default = "eu-central-1"
+    default = "<YOUR-REGION>"
 }

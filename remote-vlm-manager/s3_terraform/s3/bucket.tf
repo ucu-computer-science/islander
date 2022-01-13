@@ -5,8 +5,4 @@ resource "aws_s3_bucket" "demos3" {
     versioning {
         enabled = true
     }
-
-//    lifecycle {
-//        prevent_destroy = true
-//    }
 }

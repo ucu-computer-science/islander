@@ -161,8 +161,6 @@ char* get_username() {
     char cwd[256];
     getcwd(cwd, 256);
     exec_path = cwd;
-    printf("exec_path -- %s\n", exec_path);
-    printf("bool exec_path -- %d\n", exec_path[0] == '/');
 
     // get substring with user host path
     uint count = 0;
@@ -179,8 +177,6 @@ char* get_username() {
             }
         }
     }
-    printf("substr_start -- %d, substr_end -- %d\n", substr_start, substr_end);
-
     return substr(exec_path, substr_start, substr_end);
 }
 
@@ -231,7 +227,6 @@ void get_aws_secrets_path(char *aws_secrets_path, const char *exec_file_path) {
     char islander_home_path[256];
     get_islander_home(islander_home_path, exec_file_path);
 
-//    char aws_secrets_path2[256];
     char *secrets_prefix = SECRETS_PREFIX;
     char *aws_secrets_name = AWS_SECRETS_NAME;
     sprintf(aws_secrets_path, "%s%s%s", islander_home_path, secrets_prefix, aws_secrets_name);
@@ -288,13 +283,13 @@ void create_dir(char* subsystem_path) {
     // permission codes -- https://man7.org/linux/man-pages/man7/inode.7.html
     mode_t target_mode = 0700;
     if (mkdir(subsystem_path, target_mode) == 0) {
-//#ifdef DEBUG_MODE
+#ifdef DEBUG_MODE
         printf("Created a new directory -- %s\n", subsystem_path);
-//#endif
+#endif
     } else if (errno == 17) {
-//#ifdef DEBUG_MODE
+#ifdef DEBUG_MODE
         printf("Directory already exists -- %s\n", subsystem_path);
-//#endif
+#endif
     } else {
         printf("errno -- %d\n", errno);
         printf("Unable to create directory-- %s. Reason -- %s\n", subsystem_path, strerror(errno));

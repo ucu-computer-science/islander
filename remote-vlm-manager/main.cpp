@@ -49,11 +49,11 @@ void create_s3_bucket(std::string &user_home_path, std::string &bucket_name) {
     auto result = exec_bash_command(terraform_cmd, exit_status);
 
     terraform_cmd = "terraform plan -out s3.plan -var bucket_name=\"" + bucket_name + "\"";
-    std::cout << "trf apply -- " << terraform_cmd << std::endl;
+    std::cout << "Execute command: " << terraform_cmd << std::endl;
     result = exec_bash_command(terraform_cmd, exit_status);
 
     terraform_cmd = "terraform apply s3.plan";
-    std::cout << "trf apply -- " << terraform_cmd << std::endl;
+    std::cout << "Execute command: " << terraform_cmd << std::endl;
     result = exec_bash_command(terraform_cmd, exit_status);
     std::cout << "Output:\n " << result << std::endl;
 }

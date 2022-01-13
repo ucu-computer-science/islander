@@ -4,68 +4,25 @@
 void mount_s3_bucket(int isle_pid, char* src_bucket_name, char* dest_bucket_path, const char *exec_file_path) {
     char *islander_home_path = (char *)malloc(MAX_PATH_LENGTH);
     get_islander_home(islander_home_path, exec_file_path);
-    printf("islander_home_path -- %s\n", islander_home_path);
-
-    // make concatenations
-    char *str_arr[] = {islander_home_path, S3_BUCKET_PATH, src_bucket_name};
-    char abs_bucket_path[MAX_PATH_LENGTH];
-    abs_bucket_path[0] = '\0';
-    str_array_concat(abs_bucket_path, str_arr, 3);
-    printf("abs_bucket_path -- %s\n", abs_bucket_path);
-
-    create_dir(abs_bucket_path);
 
     char *aws_secrets_path = (char *)malloc(MAX_PATH_LENGTH);
     get_aws_secrets_path(aws_secrets_path, exec_file_path);
 
-    // create s3 bucket
-//    exec_s3_cmd("create", src_bucket_name);
-
-//    FILE *cmd = popen(s3fs_cmd, "r");
-//    pclose(cmd);
     char *username = get_username();
-    printf("username -- %s\n", username);
-
-    // create subvolume with src_vlm_name name
-//    char *str_arr2[] = {"s3fs ", "os-project-test", " ../ubuntu-rootfs/s3_bucket/ -o passwd_file=../files/s3_secrets.txt ", abs_bucket_path, "> /dev/null 2>&1"};
     char s3fs_cmd[MAX_PATH_LENGTH];
-//    btrfs_cmd[0] = '\0';
-//    str_array_concat(btrfs_cmd, str_arr2, 3);
+
+    // in this command we use s3fs to mount s3 bucket to destination dir,
+    // nonempty option is needed as our bucket, which we want to mount to our fs, can be nonempty;
+    // also use su USERNAME -c to run command as non-root user, such that is can be accessed from our isle
     sprintf(s3fs_cmd, "su %s -c \"s3fs %s %s -o nonempty -o passwd_file=%s\"", username, src_bucket_name, dest_bucket_path, aws_secrets_path);
-//    sprintf(s3fs_cmd, "s3fs %s %s -o nonempty -o passwd_file=%s && chmod 777 %s", src_bucket_name, dest_bucket_path, aws_secrets_path,
-//                                                                                        dest_bucket_path);
-    printf("s3fs_cmd -- %s\n", s3fs_cmd);
-
-//    FILE *cmd = popen(s3fs_cmd, "r");
-//    pclose(cmd);
-
-//    exec_bash_cmd(s3fs_cmd);
-//
     system(s3fs_cmd);
 
-
-//    char cmd[MAX_PATH_LENGTH];
-//    sprintf(cmd, "sudo chmod 777 %s", dest_bucket_path);
-//    printf("cmd -- %s\n", cmd);
-//    exec_bash_cmd(s3fs_cmd);
-
-//    // give permission for thw process to make read, write and execute modes for subvolume
-//    char *str_arr3[] = {"sudo chmod 770 ", dest_bucket_path, " > /dev/null 2>&1"};
-//    char chmod_cmd[MAX_PATH_LENGTH];
-//    chmod_cmd[0] = '\0';
-//    str_array_concat(chmod_cmd, str_arr3, 3);
-//
-//    FILE *cmd2 = popen(chmod_cmd, "r");
-//    pclose(cmd2);
-
-    // mount subvolume to dest_vlm_path
-//    fork_vlm_mount(isle_pid, src_bucket_name, dest_bucket_path);
     free(islander_home_path);
     free(aws_secrets_path);
 }
 
 
-/** Unmount mounted from clouds directories from dest_dir_path **/
+/** Unmount mounted from clouds directories located in dest_dir_path **/
 void umount_cloud_dir(int isle_pid, char* dest_dir_path) {
     pid_t pid = fork();
 
@@ -86,6 +43,7 @@ void umount_cloud_dir(int isle_pid, char* dest_dir_path) {
         // Here we use nsenter to enter namespace and make umount command inside it.
         char victim_name[] = "nsenter";
 
+        // here we need to apply -l option, since we use s3fs for mounting
         char args_arr[NSENTER_UNMNT_ARGS][256] = {
                 "-t", "isle_pid_str", "umount",
                 "-l", "dest_dir_path"

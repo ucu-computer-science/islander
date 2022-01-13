@@ -5,15 +5,7 @@ provider "aws" {
 }
 
 module "s3" {
-    # source = "../terraform_modules/"
     source = "./s3"
     # bucket name should be unique
-    # bucket_name = "os-project-test2"
     bucket_name = "${var.bucket_name}"
-    # bucket = "os-project-test"
-    # acl    = "private"       
-
-    # versioning = {
-    #     enabled = true
-    # }
 }
