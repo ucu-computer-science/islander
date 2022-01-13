@@ -1,8 +1,8 @@
 variable "container_name" {
 }
 variable "storage_account_name" {
-    default = "islander100azstorage"
+    default = "<YOUR-ACCOUNT-NAME>"
 }
 variable "access_key" {
-    default = "FWnmP1qSmeHlAESqEozz/5JoHeaIEKVuUmXrgLwRlUPQLKpTK1WyLolcAr3jaTko0wyoWflmkJ3nFrkf0YZZhQ=="
+    default = "<YOUR-ACCESS-KEY>"
 }
