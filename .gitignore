@@ -2,6 +2,8 @@
 isle/binary
 isle/build
 
+isle/files/s3_secrets.txt
+
 isle/rootfs-alpine-stress
 isle/rootfs-alpine-stress/home/writetest
 isle/rootfs-alpine-stress/tmp/writetest

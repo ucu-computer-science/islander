@@ -48,6 +48,18 @@ sudo gdb -p 70235 -x process_attach
 
 ## Manage data
 
+### Usage of remote volumes
+
+```shell
+# mount s3 bucket manually
+s3fs os-project-test1 ../ubuntu-rootfs/s3_bucket/ -o passwd_file=/home/denys_herasymuk/islander/remote-volumes/cloud_secrets/s3_secrets.txt
+
+# create s3 bucket
+./remote-vlm-manager create aws os-project-test6
+
+sudo ./islander_engine /bin/bash --mount-aws src os-project-test1 dst ../ubuntu-rootfs/s3_bucket/
+```
+
 ### Test data management
 
 ```shell

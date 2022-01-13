@@ -144,6 +144,11 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
 
 
 int main(int argc, char **argv) {
+//int main() {
+//    int argc = 7;
+//    char *argv[] = {"./islander_engine", "./project_bin/hello_sample", "--mount-aws",
+//                   "bucket", "os-project-test1", "dest", "../ubuntu-rootfs/s3_bucket/"};
+
     printf("PID of islander_engine: %d\n", getpid());
     bool is_detached = false;
     for (int i = 1; i < argc; i++) {
@@ -161,7 +166,7 @@ int main(int argc, char **argv) {
         pid_t pid = fork();
 
         if (pid < 0) {
-            fprintf(stderr, "fork Failed");
+            fprintf(stderr, "fork failed");
             exit(EXIT_FAILURE);
         }
         else if (pid == 0) {
