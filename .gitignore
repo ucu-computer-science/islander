@@ -17,6 +17,10 @@ isle/ubuntu-rootfs/tmp/readtest
 
 files/.OS_project_IAM_user
 
+remote-vlm-manager/az_terraform/
+remote-vlm-manager/s3_terraform/
+
+
 ### C++ ###
 # Prerequisites
 *.d

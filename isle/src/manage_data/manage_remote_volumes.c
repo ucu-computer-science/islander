@@ -22,6 +22,48 @@ void mount_s3_bucket(int isle_pid, char* src_bucket_name, char* dest_bucket_path
 }
 
 
+void mount_az_storage_container(int isle_pid, char* src_bucket_name, char* dest_bucket_path, const char *exec_file_path) {
+    char azfs_cmd[MAX_PATH_LENGTH];
+    char islander_home_path[MAX_PATH_LENGTH];
+    get_islander_home(islander_home_path, exec_file_path);
+
+    char blobfuse_tmp_path[MAX_PATH_LENGTH + 32];
+    sprintf(blobfuse_tmp_path, "%s%s", islander_home_path, AZ_BLOBFUSE_TMP_PATH);
+    printf("blobfuse_tmp_path -- %s\n", blobfuse_tmp_path);
+
+    char *az_secrets_path = (char *)malloc(MAX_PATH_LENGTH);
+    get_az_secrets_path(az_secrets_path, exec_file_path);
+    printf("az_secrets_path -- %s\n", az_secrets_path);
+
+    char blobfuse_tmp_secrets_path[MAX_PATH_LENGTH + 32];
+    sprintf(blobfuse_tmp_secrets_path, "%s/%s", islander_home_path, ISLANDER_TEMP_PATH);
+
+    char file_content[1000000];
+    FILE *fp = fopen(az_secrets_path, "r");
+    if (fp != NULL) {
+        size_t newLen = fread(file_content, sizeof(char), 1000000, fp);
+        if ( ferror( fp ) != 0 ) {
+            fputs("Error reading file", stderr);
+        } else {
+            file_content[newLen++] = '\0'; /* Just to be safe. */
+        }
+
+        fclose(fp);
+    }
+    printf("file_content -- %s\n", file_content);
+
+//    // in this command we use s3fs to mount s3 bucket to destination dir,
+//    // nonempty option is needed as our bucket, which we want to mount to our fs, can be nonempty;
+//    // also use su USERNAME -c to run command as non-root user, such that is can be accessed from our isle
+//    sprintf(azfs_cmd,
+//            "blobfuse %s --tmp-path=%s --config-file=/home/denys_herasymuk/islander/remote-volumes/cloud_secrets/az_storage_secrets.txt -o allow_other",
+//            dest_bucket_path, blobfuse_tmp_path, src_bucket_name, aws_secrets_path);
+//    system(azfs_cmd);
+
+    free(az_secrets_path);
+}
+
+
 /** Unmount mounted from clouds directories located in dest_dir_path **/
 void umount_cloud_dir(int isle_pid, char* dest_dir_path) {
     pid_t pid = fork();
@@ -44,7 +86,7 @@ void umount_cloud_dir(int isle_pid, char* dest_dir_path) {
         char victim_name[] = "nsenter";
 
         // here we need to apply -l option, since we use s3fs for mounting
-        char args_arr[NSENTER_UNMNT_ARGS][256] = {
+        char args_arr[NSENTER_UNMNT_ARGS][MAX_PATH_LENGTH] = {
                 "-t", "isle_pid_str", "umount",
                 "-l", "dest_dir_path"
         };

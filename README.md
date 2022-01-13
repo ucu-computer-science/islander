@@ -50,6 +50,19 @@ sudo gdb -p 70235 -x process_attach
 
 ### Usage of remote volumes
 
+#### Azure storage containers
+```shell
+# to mount storage container manuallu use next commands;
+# before this step, container should be already created in your stirage account
+export AZURE_STORAGE_ACCOUNT=mystorage
+export AZURE_STORAGE_ACCESS_KEY=mycontainer
+blobfuse ./test --container-name=mycontainer2 --tmp-path=/home/denys_herasymuk/islander/remote-volumes/az_storage/blobfusetmp -o allow_other
+
+# set feature of mounting Azure storage container
+sudo ./islander_engine /bin/bash --mount-az src os-project-test dst ../ubuntu-rootfs/s3_bucket/
+```
+
+#### S3 buckets
 ```shell
 # mount s3 bucket manually
 s3fs os-project-test1 ../ubuntu-rootfs/s3_bucket/ -o passwd_file=/home/denys_herasymuk/islander/remote-volumes/cloud_secrets/s3_secrets.txt
