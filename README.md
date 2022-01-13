@@ -18,6 +18,17 @@ For more details we recommend to look in section 3 of RedHat documentation about
 |   --device-read-bps [500M]   | Limit read rate from the host filesystem (format: `<number>`[`<unit>`]). Number is a positive integer. Unit can be one of kb, mb, or gb. |
 |   --device-write-bps [100M]   | Limit write rate the host filesystem (format: `<number>`[`<unit>]`). Number is a positive integer. Unit can be one of kb, mb, or gb. |
 
+
+## Compile Project
+```shell
+# 1. Create all required folders and install rootfs:
+make install_rootfs
+make create_dirs
+
+# 2. Compile all the subprojects at once:
+make
+```
+
 ## Container management
 
 ### Attach to detached container
@@ -34,7 +45,6 @@ sudo ./islander_engine ./project_bin/log_time_sample -d
 # attach to process and redirect stdout and stderr in special tty (change tty for your needs)
 sudo gdb -p 70235 -x process_attach
 ```
-
 
 ## Manage data
 
@@ -61,14 +71,57 @@ sudo ./islander_engine /bin/bash --volume src test_mnt1 dst ../ubuntu-rootfs/tes
 
 # check results in ~/islander/volumes
 sudo sh -c "cd test_mnt1/; ls"
+sudo sh -c "cat ./test_mnt1/f2.txt"
 
 # example of tmpfs feature usage
 sudo ./islander_engine /bin/bash --device-write-bps 10485760000 --memory-in-bytes 1000M --tmpfs dst ../ubuntu-rootfs/test_tmpfs size 2G nr_inodes 1k --mount src /dev/ dst ../ubuntu-rootfs/host_dev/
 ```
 
+```shell
+## Data Management
+# example of volume feature usage
+sudo ./islander_engine /bin/bash --volume src test_mnt1 dst ../ubuntu-rootfs/test_mnt/ --volume src host_dev dst ../ubuntu-rootfs/host_dev/
+
+./ps
+
+# check results in ~/islander/volumes
+sudo sh -c "cd test_mnt1/; ls"
+sudo sh -c "cat ./test_mnt1/f2.txt"
+
+
+# example of tmpfs feature usage
+sudo ./islander_engine /bin/bash --device-write-bps 10485760000 --memory-in-bytes 1000M --tmpfs dst ../ubuntu-rootfs/test_tmpfs size 2G nr_inodes 1k --mount src /dev/ dst ../ubuntu-rootfs/host_dev/
+
+
+# filter in htop
+
+# create 1G temp file
+dd if=/host_dev/zero of=./writetest bs=256k count=4000 conv=fdatasync
+
+htop
+
+df -h
+
+
+# start wireshark
+
+## Client-server interaction
+sudo ./islander-server --port 5020
+
+./client --bin id --memory-in-bytes 1000m --port 5020
+./client --bin ls --memory-in-bytes 1000m --port 5020
+./client --bin hostname --memory-in-bytes 1000m --port 5020
+./client --bin pwd --memory-in-bytes 1000m --port 5020
+
+# show wireshark
+
+```
+
 
 ### tmpfs usage
 ```shell
+sudo mount /dev/nvme0n1p5 ~/islander/volumes/
+
 # filter in htop
 
 sudo mount -t tmpfs -o size=2G,nr_inodes=1k,mode=777 tmpfs ./reports
@@ -103,6 +156,34 @@ sudo mount /dev/nvme0n1p5 -o subvol=test_volume ./test_volumes/
 sudo umount ./test_volumes/
 ```
 
+### Namespaces Usage
+```shell
+# Check User Namespace
+id
+
+# Check UTS Namespace
+hostname <some-host-name>
+hostname
+
+# Check Mount Namespace
+ls
+cd ..
+ls
+
+# Check PID Namespace
+echo $$
+
+# Check Network Namespace
+ip link list
+ping 10.1.1.1
+```
+
+### PS Usage
+```shell
+shell-main # sudo ./islander_engine /bin/bash
+
+shell-seconady # ./ps
+```
 
 
 ## Limit management
