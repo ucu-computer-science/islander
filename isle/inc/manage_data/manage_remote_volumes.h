@@ -7,7 +7,7 @@
 
 void mount_s3_bucket(int isle_pid, char* src_bucket_name, char* dest_bucket_path, const char *exec_file_path);
 
-void exec_s3_cmd(char *operation, char *bucket_name);
+void mount_az_storage_container(int isle_pid, char* src_bucket_name, char* dest_bucket_path, const char *exec_file_path);
 
 void umount_cloud_dir(int isle_pid, char* dest_dir_path);
 

@@ -38,7 +38,7 @@ void mount_ns_dir(int isle_pid, char* src_dir_path, char* dest_dir_path) {
         // Here we use nsenter to enter namespace and make mount command inside it.
         char victim_name[] = "nsenter";
 
-        char args_arr[NSENTER_MNT_ARGS][256] = {
+        char args_arr[NSENTER_MNT_ARGS][MAX_PATH_LENGTH] = {
                 "-t", "isle_pid_str", "mount",
                 "--bind", "src_dir_path", "dest_dir_path"
         };
@@ -84,7 +84,7 @@ void unmount_ns_dir(int isle_pid, char* dest_dir_path) {
         // Here we use nsenter to enter namespace and make umount command inside it.
         char victim_name[] = "nsenter";
 
-        char args_arr[NSENTER_UNMNT_ARGS][256] = {
+        char args_arr[NSENTER_UNMNT_ARGS][MAX_PATH_LENGTH] = {
                 "-t", "isle_pid_str", "umount",
                 "-R", "dest_dir_path"
         };

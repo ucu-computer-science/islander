@@ -26,7 +26,7 @@ void mount_ns_tmpfs(int isle_pid, struct process_params *params) {
         // Here we use nsenter to enter namespace and make mount command inside it.
         char victim_name[] = "nsenter";
 
-        char args_arr[NSENTER_TMPFS_ARGS][256] = {
+        char args_arr[NSENTER_TMPFS_ARGS][MAX_PATH_LENGTH] = {
                 "-t", "<ISLE_PID_STR>", "mount",
                 "-t", "tmpfs",
                 "tmpfs", "<MOUNT_POINT>",
@@ -37,7 +37,7 @@ void mount_ns_tmpfs(int isle_pid, struct process_params *params) {
         // make concatenations
         // tmpfs_size
         char *str_arr[] = {"size=", params->tmpfs_size, ",nr_inodes=", params->tmpfs_nr_inodes, ",mode=770"};
-        char options[256];
+        char options[MAX_PATH_LENGTH];
         options[0] = '\0';
         str_array_concat(options, str_arr, 5);
         strcpy(args_arr[8], options);

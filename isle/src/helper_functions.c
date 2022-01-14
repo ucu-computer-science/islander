@@ -51,6 +51,12 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
             params->remote_vlm.mnt_aws_dst = argv[i + 4];
             i += 4;
 
+        } else if (strcmp(argv[i], "--mount-az") == 0) {
+            params->remote_vlm.is_mount_az = true;
+            params->remote_vlm.mnt_az_src = argv[i + 2];
+            params->remote_vlm.mnt_az_dst = argv[i + 4];
+            i += 4;
+
         // detached mode feature
         } else if (strcmp(argv[i], "--detach") == 0 || strcmp(argv[i], "-d") == 0) {
             params->is_detached = true;
@@ -129,6 +135,8 @@ void enable_features(int isle_pid, struct process_params *params, const char *ex
     if (params->is_tmpfs) mount_ns_tmpfs(isle_pid, params);
     if (params->remote_vlm.is_mount_aws) mount_s3_bucket(isle_pid, params->remote_vlm.mnt_aws_src,
                                                          params->remote_vlm.mnt_aws_dst, exec_file_path);
+    if (params->remote_vlm.is_mount_az) mount_az_storage_container(isle_pid, params->remote_vlm.mnt_az_src,
+                                                                    params->remote_vlm.mnt_az_dst, exec_file_path);
 }
 
 
@@ -137,6 +145,7 @@ void release_resources(int isle_pid, struct process_params *params) {
     if (params->is_volume) unmount_volumes(isle_pid, params);
     if (params->is_tmpfs) unmount_ns_dir(isle_pid, params->tmpfs_dst);
     if (params->remote_vlm.is_mount_aws) umount_cloud_dir(isle_pid, params->remote_vlm.mnt_aws_dst);
+    if (params->remote_vlm.is_mount_az) umount_cloud_dir(isle_pid, params->remote_vlm.mnt_az_dst);
 
 //    rm_cgroup_dirs(isle_pid);
 
@@ -168,8 +177,8 @@ char* substr(const char *src, int m, int n) {
 
 char* get_username() {
     const char *exec_path;
-    char cwd[256];
-    getcwd(cwd, 256);
+    char cwd[MAX_PATH_LENGTH];
+    getcwd(cwd, MAX_PATH_LENGTH);
     exec_path = cwd;
 
     // get substring with user host path
@@ -193,7 +202,7 @@ char* get_username() {
 
 void get_islander_home(char *islander_home_path, const char *exec_file_path) {
     const char *exec_path;
-    char user_home_path[256];
+    char user_home_path[MAX_PATH_LENGTH];
 
     // here we find use home path as where islander is located by default.
     // For example, /home/username/
@@ -205,8 +214,8 @@ void get_islander_home(char *islander_home_path, const char *exec_file_path) {
     else {
         // set exec_path to current working dir to use exec_path for getting substring with user host path,
         // in case we run islander_engine binary with relative path to it
-        char cwd[256];
-        getcwd(cwd, 256);
+        char cwd[MAX_PATH_LENGTH];
+        getcwd(cwd, MAX_PATH_LENGTH);
         exec_path = cwd;
     }
 
@@ -226,7 +235,7 @@ void get_islander_home(char *islander_home_path, const char *exec_file_path) {
 
     // make concatenations
     char *str_arr[] = {user_home_path, ISLANDER_HOME_PREFIX};
-    char islander_home_path2[256];
+    char islander_home_path2[MAX_PATH_LENGTH];
     islander_home_path2[0] = '\0';
     str_array_concat(islander_home_path2, str_arr, 2);
     strcpy(islander_home_path, islander_home_path2);
@@ -234,12 +243,22 @@ void get_islander_home(char *islander_home_path, const char *exec_file_path) {
 
 
 void get_aws_secrets_path(char *aws_secrets_path, const char *exec_file_path) {
-    char islander_home_path[256];
+    char islander_home_path[MAX_PATH_LENGTH];
     get_islander_home(islander_home_path, exec_file_path);
 
     char *secrets_prefix = SECRETS_PREFIX;
     char *aws_secrets_name = AWS_SECRETS_NAME;
     sprintf(aws_secrets_path, "%s%s%s", islander_home_path, secrets_prefix, aws_secrets_name);
+}
+
+
+void get_az_secrets_path(char *az_secrets_path, const char *exec_file_path) {
+    char islander_home_path[MAX_PATH_LENGTH];
+    get_islander_home(islander_home_path, exec_file_path);
+
+    char *secrets_prefix = SECRETS_PREFIX;
+    char *aws_secrets_name = AZ_SECRETS_NAME;
+    sprintf(az_secrets_path, "%s%s%s", islander_home_path, secrets_prefix, aws_secrets_name);
 }
 
 
@@ -305,6 +324,14 @@ void create_dir(char* subsystem_path) {
         printf("Unable to create directory-- %s. Reason -- %s\n", subsystem_path, strerror(errno));
         exit(1);
     }
+}
+
+
+void remove_file(char *file_path) {
+    if (remove(file_path) == 0)
+        printf("Deleted successfully\n");
+    else
+        printf("Unable to delete the file\n");
 }
 
 

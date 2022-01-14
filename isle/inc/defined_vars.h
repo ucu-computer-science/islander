@@ -19,13 +19,18 @@
 //#define SRC_VOLUMES_PATH "/var/lib/islander/volumes/"
 #define SRC_VOLUMES_PATH "islander/volumes/"
 #define ISLANDER_HOME_PREFIX "islander/"
+#define ISLANDER_TEMP_PATH "tmp"
 #define ISLANDER_BIN_PATH "../../bin/"
 #define REMOTE_VLM_MANAGER_NAME "remote-vlm-manager"
 
-// vars for remote volumes
+// =========== vars for remote volumes ===========
+// AWS
 #define SECRETS_PREFIX "remote-volumes/cloud_secrets/"
 #define AWS_SECRETS_NAME "s3_secrets.txt"
 #define S3_BUCKET_PATH "remote-volumes/s3_buckets/"
+// Azure
+#define AZ_SECRETS_NAME "az_storage_secrets.txt"
+#define AZ_BLOBFUSE_TMP_PATH "tmp/blobfusetmp"
 
 
 #define ISLENODE_FORMAT ".txt"
