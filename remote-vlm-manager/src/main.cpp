@@ -1,6 +1,7 @@
 #include "../inc/base_header.h"
 #include "../inc/s3_interaction.h"
 #include "../inc/az_interaction.h"
+#include "../inc/gcp_interaction.h"
 
 
 int main(int argc, char *argv[]) {
@@ -35,10 +36,12 @@ int main(int argc, char *argv[]) {
     if (operation == CREATE_VLM) {
         if (cloud_provider == AWS_CLOUD) create_s3_bucket(user_home_path, bucket_name);
         else if (cloud_provider == AZ_CLOUD) create_az_storage_container(user_home_path, bucket_name);
+        else if (cloud_provider == GCP_CLOUD) create_gcp_bucket(user_home_path, bucket_name);
     }
     else if (operation == DELETE_VLM) {
         if (cloud_provider == AWS_CLOUD) delete_s3_bucket(user_home_path, bucket_name);
         else if (cloud_provider == AZ_CLOUD) delete_az_storage_container(user_home_path, bucket_name);
+        else if (cloud_provider == GCP_CLOUD) delete_gcp_bucket(user_home_path, bucket_name);
     }
     else {
         fprintf(stderr, "You input incorrect operation or cloud provider\n");
