@@ -14,6 +14,7 @@
 
 static char cmd_stack[STACKSIZE];
 
+
 static int child_fn(void *arg) {
     // Kill the cmd process if the isolate process die.
     if (prctl(PR_SET_PDEATHSIG, SIGKILL))
@@ -88,7 +89,7 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
 
     // Get UNIX socket fd. Note that process_logger should be already running.
     if (params.is_detached) {
-        params.sfd = connect_to_process_logger();
+        params.sfd = connect_to_process_logger(params.name ? params.name : "isle");
     }
 
     // Clone command process.

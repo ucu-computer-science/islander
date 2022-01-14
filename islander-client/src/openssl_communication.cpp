@@ -4,15 +4,58 @@
 #include "../inc/openssl_communication.h"
 #include "../inc/communication_functions.h"
 
-SSL *ssl;
+#include <string>
+#include <iostream>
+#include <thread>
 
-void run_encrypted_client(int port, std::string& message, std::string& command_output_buf) {
+
+SSL *ssl;
+static volatile sig_atomic_t child_pid = -1;
+static volatile sig_atomic_t server_fd = -1;
+
+
+void handle_quit_from_reader(int signum) {
+    if ((signum == SIGHUP || signum == SIGQUIT || signum == SIGINT) && server_fd != -1) {
+        close(server_fd);         /* close socket */
+    }
+
+    // Raise signal again
+    signal(signum, SIG_DFL);
+    raise(signum);
+}
+
+
+void handle_sighup(int signum) {
+    /* in case we registered this handler for multiple signals */
+    if ((signum == SIGHUP || signum == SIGQUIT || signum == SIGINT) && child_pid != -1) {
+        cout << "\nSafely exiting server" << endl;
+        kill(child_pid, SIGINT);
+    }
+
+    // Raise signal again
+    signal(signum, SIG_DFL);
+    raise(signum);
+}
+
+
+void read_from_stdin() {
+    // implement reading from stdin and sending to server
+    while (true) {
+        std::string input;
+        std::getline(std::cin, input);
+        std::string cmd = input + "\n";
+        SSL_write(ssl, cmd.c_str(), strlen(cmd.c_str()));
+    }
+}
+
+
+void run_encrypted_client(int port, std::string& address, std::string& message) {
     SSL_CTX *ctx;
     int server;
 
     SSL_library_init();
     ctx = InitCTX();
-    server = OpenConnection(SERVER_ADDRESS, port);
+    server = OpenConnection(address.c_str(), port);
 
     ssl = SSL_new(ctx);      /* create new SSL connection state */
     SSL_set_fd(ssl, server);    /* attach the socket descriptor */
@@ -20,12 +63,22 @@ void run_encrypted_client(int port, std::string& message, std::string& command_o
         ERR_print_errors_fp(stderr);
     else {
         if (is_authorized_user(server) != 0) {
-            run_command_remotely(server, message, command_output_buf, true);
+            server_fd = server;
+            // Handle interruptions
+            signal(SIGHUP, handle_quit_from_reader);
+            signal(SIGINT, handle_quit_from_reader);
+            signal(SIGQUIT, handle_quit_from_reader);
+
+            std::thread reader(read_from_stdin);
+            reader.detach();
+
+            run_command_remotely(server, message, true);
         }
     }
     SSL_free(ssl);         /* release connection state */
     close(server);         /* close socket */
     SSL_CTX_free(ctx);     /* release context */
+    exit(0);
 }
 
 
@@ -46,8 +99,7 @@ int is_authorized_user(int server_fd) {
 
     SSL_write(ssl, acClientRequest, strlen(acClientRequest));   /* encrypt & send message */
 
-    std::string command_output_buf;
-    recv_cmd_output(server_fd, command_output_buf, true);
+    std::string command_output_buf = recv_cmd_output(server_fd, true, true);
     return command_output_buf != INVALID_CREDS_MSG;
 }
 

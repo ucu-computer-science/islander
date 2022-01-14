@@ -22,11 +22,10 @@ For more details we recommend to look in section 3 of RedHat documentation about
 ## Compile Project
 ```shell
 # 1. Create all required folders and install rootfs:
-make install_rootfs
-make create_dirs
+make configure
 
 # 2. Compile all the subprojects at once:
-make
+make build
 ```
 
 ## Container management
@@ -50,32 +49,58 @@ sudo gdb -p 70235 -x process_attach
 
 ### Usage of remote volumes
 
-#### Azure storage containers
-```shell
-# to mount storage container manuallu use next commands;
-# before this step, container should be already created in your stirage account
-export AZURE_STORAGE_ACCOUNT=mystorage
-export AZURE_STORAGE_ACCESS_KEY=mycontainer
-blobfuse ./test --container-name=mycontainer2 --tmp-path=/home/denys_herasymuk/islander/remote-volumes/az_storage/blobfusetmp -o allow_other
-
-# set feature of mounting Azure storage container
-sudo ./islander_engine /bin/bash --mount-az src os-project-test dst ../ubuntu-rootfs/s3_bucket/
-sudo ./islander_engine /bin/bash --mount-az src mycontainer7 dst ../ubuntu-rootfs/s3_bucket/
-
-# set feature of mounting GCP storage bucket
-sudo ./islander_engine /bin/bash --mount-gcp src os-project-test dst ../ubuntu-rootfs/s3_bucket/
-```
-
 #### S3 buckets
 ```shell
-# mount s3 bucket manually
-s3fs os-project-test1 ../ubuntu-rootfs/s3_bucket/ -o passwd_file=/home/denys_herasymuk/islander/remote-volumes/cloud_secrets/s3_secrets.txt
-
 # create s3 bucket
-./remote-vlm-manager create aws os-project-test6
+./remote-vlm-manager create aws os-project-bucket2022
 
-sudo ./islander_engine /bin/bash --mount-aws src os-project-test1 dst ../ubuntu-rootfs/s3_bucket/
+# mount s3 bucket manually
+s3fs os-project-bucket2022 ../ubuntu-rootfs/s3_bucket/ -o passwd_file=/home/denys_herasymuk/islander/remote-volumes/cloud_secrets/s3_secrets.txt
+
+# mount s3 bucket with islander_engine
+sudo ./islander_engine /bin/bash --mount-aws src os-project-bucket2022 dst ../ubuntu-rootfs/s3_bucket/
+
+# delete s3 bucket
+./remote-vlm-manager delete aws os-project-bucket2022
 ```
+
+
+#### Azure storage containers
+```shell
+# create storage container
+./remote-vlm-manager create az os-project-bucket2022
+
+# to mount storage container manually use next commands;
+# before this step, container should be already created in your storage account
+export AZURE_STORAGE_ACCOUNT=mystorage
+export AZURE_STORAGE_ACCESS_KEY=mycontainer
+blobfuse ./test --container-name=os-project-bucket2022 --tmp-path=/home/denys_herasymuk/islander/remote-volumes/az_storage/blobfusetmp -o allow_other
+
+# set feature of mounting Azure storage container
+sudo ./islander_engine /bin/bash --mount-az src os-project-bucket2022 dst ../ubuntu-rootfs/s3_bucket/
+
+# delete storage container
+./remote-vlm-manager delete az os-project-bucket2022
+```
+
+
+#### GCP buckets
+```shell
+# create storage container
+./remote-vlm-manager create gcp os-project-bucket2022
+
+# to mount bucket manually use next commands;
+# before this step, bucket should be already created in your GCP account
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/secrets.json
+gcsfuse my_bucket_name /path/to/mountpoint
+
+# set feature of mounting GCP storage bucket
+sudo ./islander_engine /bin/bash --mount-gcp src os-project-bucket2022 dst ../ubuntu-rootfs/s3_bucket/
+
+# delete storage container
+./remote-vlm-manager delete az os-project-bucket2022
+```
+
 
 ### Test data management
 

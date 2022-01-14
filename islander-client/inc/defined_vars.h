@@ -26,4 +26,7 @@
 #define DEFAULT_CPU_PERIOD              "100000"
 #define DEFAULT_CPU_QUOTA               "1000000"
 
+#define PIPE_READ           0
+#define PIPE_WRITE          1
+
 #endif //CLIENT_SERVER_DEFINED_VARS_H

@@ -13,7 +13,7 @@
 #define ERROR_DESC           2
 //#define DEBUG_MODE
 
-#define NOT_REDIRECT "no"
+#define NOT_REDIRECT        "no"
 
 #define MIN_PORT            1024
 #define MAX_PORT            65535
@@ -23,6 +23,7 @@
 #define SOCKET_BUF_SIZE     4092
 #define COMMUNICATION_DELIMiTER  "COMMUNICATION_DELIMiTER"
 #define FAIL    -1
+#define OK    0
 #define INVALID_CREDENTIALS    "\n################# Invalid credentials #################\n"
 
 #define ENCRYPTED_PIPE_READ 0

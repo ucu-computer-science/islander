@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(client C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 #set(GCC_COVERAGE_LINK_FLAGS    "-D_GLIBCXX_USE_CXX11_ABI=0")
 #set(GCC_COVERAGE_LINK_FLAGS    "-Wall -std=c++11")
 #set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}")
@@ -28,3 +29,8 @@ find_package(OpenSSL)
 include_directories(${OpenSSL_INCLUDE_DIR})
 
 target_link_libraries(${PROJECT_NAME} Boost::program_options ${Readline_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${OPENSSL_SSL_LIBRARIES})
+
+# bin
+set_target_properties(${PROJECT_NAME}
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)

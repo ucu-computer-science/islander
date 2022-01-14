@@ -3,27 +3,18 @@
 
 #include <boost/algorithm/string.hpp>
 #include <sys/wait.h>
-#include <fstream>
-#include <sstream>
-#include <cerrno>
-#include <map>
+
+#include <fcntl.h>    /* For O_RDWR */
+#include <unistd.h>   /* For open(), creat() */
 
 #include "../include/defined_vars.hpp"
-#include "../include/internal_commands.hpp"
 #include "../include/execution_functs.hpp"
 #include "../include/utils.hpp"
-#include "../include/pipe.h"
-#include "../include/redirect.h"
-#include "../include/enclosed_cmd.h"
 
 int merrno_status = OK;
 
-/* here we use global variable, since encrypted mode is used for all clients */
-extern bool need_encryption;
-
-
 /** Run external command via fork and exec syscalls */
-void run_external_command(int* read_pfd, int* write_pfd, std::string& cmd) {
+void run_external_command(int* read_pfd, int* write_pfd, std::string& cmd, char *devname, int* ptm) {
     pid_t pid = fork();
 
     if (pid == -1) {
@@ -32,67 +23,39 @@ void run_external_command(int* read_pfd, int* write_pfd, std::string& cmd) {
     }
     else if (pid > 0) {
         // We are parent
-        if (false) {
-            signal(SIGCHLD, SIG_IGN);
-        } else {
-            // We are parent process
-            signal(SIGCHLD, SIG_IGN);
-//            waitpid(pid, &merrno_status, 0);
+        signal(SIGCHLD, SIG_IGN);
 
-            // close write end of pipe to send EOF to read end of pipe
-            close(read_pfd[ENCRYPTED_PIPE_WRITE]);
-            close(write_pfd[ENCRYPTED_PIPE_READ]);
-        }
+        // close write end of pipe to send EOF to read end of pipe
+        close(read_pfd[ENCRYPTED_PIPE_WRITE]);
+        close(write_pfd[ENCRYPTED_PIPE_READ]);
     }
     else {
-        // We are child
-//        if (true) {
-//            std::vector<int> std_fds = {STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO};
-//            for (auto &std_fd : std_fds) {
-//                if (close(std_fd) == -1)
-//                    encrypted_cerr_if_needed("fork_redirect(): failed to close std fd for detached mode");
-//            }
-//        }
         // close write end of pipe to send EOF to read end of pipe
         close(read_pfd[ENCRYPTED_PIPE_READ]);
         close(write_pfd[ENCRYPTED_PIPE_WRITE]);
-        exec_command(read_pfd, write_pfd, cmd);
+
+        close(*ptm);  // Close pseudo terminal master
+        setsid();  // Detach from the current TTY
+        int pts = open(devname, O_RDWR);  // Open slave
+        if (pts < 0) exit(FAIL);  // TODO: signal to handler that we are dead
+
+        exec_command(read_pfd, write_pfd, cmd, &pts);
     }
 }
 
 
-void exec_command(int* read_pfd, int* write_pfd, std::string& cmd) {
+void exec_command(int* read_pfd, int* write_pfd, std::string& cmd, int* pts) {
     // We are the child
-    chdir("../../isle/build/");
+    static char* engine_path = "../isle/build";
+    chdir(engine_path);
     // Add dot to PATH
-    std::string command =  "./islander_engine"; // "./midterm";  //
+    std::string command =  "./islander_engine";  //
     std::string victim_name(command);
 
     std::vector<std::string> args;
     boost::split(args, cmd, boost::is_any_of(" "));
 
     args.insert(args.begin(), victim_name); // Zero argument should be program name
-
-//    std::cout << "ARG LIST:" << std::endl;
-//    for (auto arg : args){
-//        std::cout << "|" << arg << "|" << std::endl;
-//    }
-//    std::cout << "END" << std::endl;
-
-    //! Assume that the number of arguments at the time of compilation is unknown!
-    //! This situation will be used by us often, corrections.
-    //! Otherwise there is no need to do so difficult.
-//    std::vector<std::string> args;
-//    args.push_back(victim_name);
-//    args.emplace_back("/bin/bash");
-
-//    for (auto &flag: input_struct.flags) {
-//        args.emplace_back(flag);
-//    }
-//
-//    for (auto &arg: input_struct.args) {
-//        args.emplace_back(arg);
-//    }
 
     //! Environment is ready
     //! Prepare args array in form suitable for execvp
@@ -108,13 +71,6 @@ void exec_command(int* read_pfd, int* write_pfd, std::string& cmd) {
 
     arg_for_c.push_back(nullptr);
 
-#ifdef DEBUG_MODE
-    cout << "before if (need_encryption) -- " << need_encryption << endl;
-    cout << "before if cmd_is_pipe -- " << cmd_is_pipe(false, false) << endl;
-    cout << "before if cmd_is_redirect -- " << cmd_is_redirect(false, false) << endl;
-    cout << "before if cmd_is_enclosed -- " << cmd_is_enclosed(false, false) << endl;
-#endif
-
     /* For external commands we need to enable encryption also, but we have no access to their i/o functions.
      * Hence, we use dup2() to redirect their output from stdout and stderr into write end of the pipe from,
      * which the parent process can read and encrypt that output */
@@ -125,27 +81,29 @@ void exec_command(int* read_pfd, int* write_pfd, std::string& cmd) {
     saved_stderr = dup(STDERR_FILENO);
     saved_stdin = dup(STDIN_FILENO);
 
-//    std::cout<< "aha" << std::endl;
-
     // Redirect stdout & stderr in write_pipe_fd for encryption mode
-    if (dup2(write_pfd[ENCRYPTED_PIPE_READ], STDIN_FILENO) == -1) {
+    if (dup2(*pts, STDIN_FILENO) == -1) {
         encrypted_cerr_if_needed("dup2: failed to duplicate stdin on socket fd");
         exit(EXIT_FAILURE);
     }
-    if (dup2(read_pfd[ENCRYPTED_PIPE_WRITE], STDOUT_FILENO) == -1) {
+    if (dup2(*pts, STDOUT_FILENO) == -1) {
         encrypted_cerr_if_needed("dup2: failed to duplicate stdout on socket fd");
         exit(EXIT_FAILURE);
     }
-    if (dup2(read_pfd[ENCRYPTED_PIPE_WRITE], STDERR_FILENO) == -1) {
+    if (dup2(*pts, STDERR_FILENO) == -1) {
         encrypted_cerr_if_needed("dup2: failed to duplicate stderr on socket fd");
         exit(EXIT_FAILURE);
     }
 
+//    std::cout << "ARG LIST:" << std::endl;
+//    for (auto arg : args){
+//        std::cout << "|" << arg << "|" << std::endl;
+//    }
+//    std::cout << "END" << std::endl;
+
     //! const_cast is used because I don't see another way
     //! with const char ** get the char * const * that function wants
     execvp(victim_name.c_str(), const_cast<char* const*>(arg_for_c.data()));
-
-    std::cout<< "back" << std::endl;
 
     /* in case, when the command failed */
     std::string msg = "Parent: Failed to execute " + victim_name + " \n\t";
@@ -161,12 +119,12 @@ void exec_command(int* read_pfd, int* write_pfd, std::string& cmd) {
         encrypted_cerr_if_needed("dup2: failed to duplicate stdout on socket fd");
         exit(EXIT_FAILURE);
     }
-//    if (dup2(saved_stderr, STDERR_FILENO) == -1) {
-//        encrypted_cerr_if_needed("dup2: failed to duplicate stderr on socket fd");
-//        exit(EXIT_FAILURE);
-//    }
+    if (dup2(saved_stderr, STDERR_FILENO) == -1) {
+        encrypted_cerr_if_needed("dup2: failed to duplicate stderr on socket fd");
+        exit(EXIT_FAILURE);
+    }
 
-    close(get_write_pipe_fd(false, false));
+    close(*pts);
 
-    exit_if_needed(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
 }

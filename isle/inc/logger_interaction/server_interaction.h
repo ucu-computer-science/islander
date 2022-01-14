@@ -15,6 +15,6 @@
 
 #define SV_SOCK_PATH "/tmp/logger_server_socket1"
 
-int connect_to_process_logger();
+int connect_to_process_logger(char* islename);
 
 #endif //ISLANDER_ENGINE_SERVER_INTERACTION_H

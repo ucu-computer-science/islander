@@ -15,6 +15,7 @@
 #define SRC_ROOTFS_PATH "../ubuntu-rootfs"
 //#define ISLENODE_DIR_PATH "../isle/islenodes/"
 //#define ISLENODE_DIR_PATH "/home/denys_herasymuk/islander/islenodes/"
+#define ISLENODE_FORMAT "txt"
 #define ISLENODE_DIR_PATH "islenodes/"
 
 //#define SRC_VOLUMES_PATH "/var/lib/islander/volumes/"
@@ -35,7 +36,6 @@
 // GCP
 #define GCP_SECRETS_NAME "gcp_secrets.json"
 
-#define ISLENODE_FORMAT ".txt"
 #define NSENTER_MNT_ARGS 7
 #define NSENTER_VLM_ARGS 8
 #define NSENTER_TMPFS_ARGS 9
