@@ -46,7 +46,7 @@ void run_external_command(int* read_pfd, int* write_pfd, std::string& cmd, char 
 
 void exec_command(int* read_pfd, int* write_pfd, std::string& cmd, int* pts) {
     // We are the child
-    static char* engine_path = "./isle/build";
+    static char* engine_path = "../isle/build";
     chdir(engine_path);
     // Add dot to PATH
     std::string command =  "./islander_engine";  //
