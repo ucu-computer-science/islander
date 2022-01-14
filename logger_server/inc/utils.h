@@ -13,6 +13,7 @@
 
 #define ISLANDER_HOME_PREFIX "islander/"
 #define LOGGER_DIR_PATH "logger/"
+#define LOG_FDS_DIR_PATH "log_fds/"
 
 void get_logger_path(char* path);
 

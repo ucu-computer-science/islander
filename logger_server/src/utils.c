@@ -26,6 +26,6 @@ void get_logger_path(char* path) {
     user_home_path[substr_len] = '\0';
 
     strcat(user_home_path, ISLANDER_HOME_PREFIX);
-    strcat(user_home_path, LOGGER_DIR_PATH);
+    //strcat(user_home_path, LOGGER_DIR_PATH);
     strcpy(path, user_home_path);
 }
