@@ -52,6 +52,15 @@ std::string command_line_options::get_bin() {
     return "";
 }
 
+std::string command_line_options::get_address() {
+    if (var_map.find("address") != var_map.end()) {
+        std::string string_val = var_map["address"].as<std::string>();
+        return string_val;
+    }
+    return "127.0.0.1";
+}
+
+
 std::string command_line_options::parse_number_with_unit(std::string& search_param, std::string default_val) {
     if (var_map.find(search_param) != var_map.end()) {
         std::string string_val = var_map[search_param].as<std::string>();
@@ -166,6 +175,8 @@ std::string command_line_options::get_volume() {
 void command_line_options::init_opt_description() {
     opt_conf.add_options()
         ("help,h", "Show help message");
+    opt_conf.add_options()
+            ("address", po::value<std::string>(), "Set server address");
     opt_conf.add_options()
             ("port", po::value<std::string>(), "Set server port");
     opt_conf.add_options()

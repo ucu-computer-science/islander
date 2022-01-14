@@ -18,7 +18,6 @@ For more details we recommend to look in section 3 of RedHat documentation about
 |   --device-read-bps [500M]   | Limit read rate from the host filesystem (format: `<number>`[`<unit>`]). Number is a positive integer. Unit can be one of kb, mb, or gb. |
 |   --device-write-bps [100M]   | Limit write rate the host filesystem (format: `<number>`[`<unit>]`). Number is a positive integer. Unit can be one of kb, mb, or gb. |
 
-
 ## Compile Project
 ```shell
 # 1. Create all required folders and install rootfs:
@@ -27,23 +26,6 @@ make create_dirs
 
 # 2. Compile all the subprojects at once:
 make
-```
-
-## Container management
-
-### Attach to detached container
-
-Manual approach for debugging:
-```shell
-# run logger_server to save containers output
-sudo ./logger_server
-
-# start container in detached mode;
-# binary file path is based on ubuntu-root-fs as root dir
-sudo ./islander_engine ./project_bin/log_time_sample -d
-
-# attach to process and redirect stdout and stderr in special tty (change tty for your needs)
-sudo gdb -p 70235 -x process_attach
 ```
 
 ## Manage data
@@ -294,12 +276,6 @@ dd if=/host_dev/zero of=/tmp/writetest bs=64k count=1600 conv=fdatasync && rm /t
 * `docker run -ti --rm containerstack/alpine-stress sh`
 * `docker export ec72296fbdde | gzip > alpine-stress.tar.gz` or
  `docker export 0d95c058d6ea > alpine-stress.tar.gz`
-* to send SIGKILL to process use:
-```shell
-# get PID
-ps ax | grep isla
-sudo kill -s SIGKILL <PID>
-```
 * to check limits ou can use `glances` Linux tool
 * load computer memory
 ```shell

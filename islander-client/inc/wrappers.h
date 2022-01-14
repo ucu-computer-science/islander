@@ -15,6 +15,4 @@ void send_wrapper(bool need_encryption, int sockfd, std::string &msg);
 
 ssize_t recv_wrapper(bool need_encryption, int sockfd, char *buf);
 
-void close_sock_wrapper(bool need_encryption, int fd);
-
 #endif //CLIENT_WRAPPERS_H
