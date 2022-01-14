@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <streambuf>
 #include <vector>
 #include <ftw.h>
 #include <csignal>
@@ -8,7 +9,6 @@
 
 
 #define MAX_FD_NUM 20
-#define ISLENODE_PATH "/home/yaroslav_morozevych/islander/islenodes/"
 
 /* Structure to contain all the necessary information about the isles (containers). */
 struct islenode {
@@ -77,9 +77,7 @@ std::vector<struct islenode> parse_files(std::vector<std::string> &files, std::s
 
 
 int main() {
-    std::string p = getenv("ISLANDER_HOME");
-    std::cout << p << std::endl;
-    std::string path = ISLENODE_PATH;
+    std::string path = "../isle/islenodes";
     rls(path, FTW_PHYS);
 
     // Skip the directory.

@@ -45,7 +45,7 @@ int command_line_options::get_port() {
 
 void command_line_options::init_opt_description() {
     opt_conf.add_options()
-        ("help,h", "Show help message");
+            ("help,h", "Show help message");
     opt_conf.add_options()
             ("server", "Launch in server mode");
     opt_conf.add_options()

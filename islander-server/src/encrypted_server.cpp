@@ -4,6 +4,9 @@
 #include "../include/encrypted_server.h"
 #include "../include/execution_functs.hpp"
 
+#include <thread>
+
+
 /* here we use global variable, since ssl var used as descriptor for all read/write operations for encrypted server */
 SSL *ssl;
 
@@ -111,6 +114,27 @@ void run_encrypted_server(int port) {
 }
 
 
+int write_buffer(int fd, const char* buffer, ssize_t size, int* status) {
+    ssize_t written_bytes = 0;
+    while (written_bytes < size) {
+        ssize_t written_now = write(fd, buffer + written_bytes, size - written_bytes);
+        if (written_now == -1) {
+            if (errno == EINTR) {
+                continue;
+            } else {
+                if (status != nullptr) {
+                    *status = errno;
+                }
+                return -1;
+            }
+        } else {
+            written_bytes += written_now;
+        }
+    }
+    return 0;
+}
+
+
 [[noreturn]] void process_new_client(SSL* ssl, sockaddr_in* client_info) {
     char buf[SOCKET_BUF_SIZE] = {0};
     std::string ServerResponse = "Encryption successful.\n\n";
@@ -135,20 +159,68 @@ void run_encrypted_server(int port) {
     int write_pfd[2];
     int read_pfd[2];
 
+    // Create a pseudo-terminal
+    char *devname;
+    int ptm;
+
+    ptm = open("/dev/ptmx", O_RDWR);
+    fcntl(ptm, F_SETFD, FD_CLOEXEC);
+
+    int flags = fcntl(ptm, F_GETFL, 0);
+    fcntl(ptm, F_SETFL, flags | O_NONBLOCK);
+
+    if(grantpt(ptm) || unlockpt(ptm) || ((devname = (char*)ptsname(ptm)) == 0)) {
+        log_action(client_info, "Unable to create pseudo terminal");
+        exit(FAIL);
+    }
+
     bool script_launched = false;
+    bool skip_same_command_output = false;
+    ssize_t nbytes;
+    char inbuf[SOCKET_BUF_SIZE];
+    std::string to_write;
     for (;;) {
         // Read from socket until new line character appears
         for (;;) {
+            // Try to read from the pseudo-terminal master
+            nbytes = read(ptm, inbuf, SOCKET_BUF_SIZE);
+
+            if (nbytes > 0 && !skip_same_command_output) {
+                inbuf[nbytes] = '\0';
+                to_write += inbuf;
+                to_write += COMMUNICATION_DELIMiTER;
+                SSL_write(ssl, to_write.c_str(), to_write.size());
+                to_write = "";
+            } else if (nbytes > 0 && skip_same_command_output) {
+                skip_same_command_output = false;
+                inbuf[nbytes] = '\0';
+                to_write += inbuf;
+                std::vector<std::string> output_lst;
+                boost::split(output_lst, to_write, boost::is_any_of("\n"));
+                std::string filtered;
+                for (int i = 0; i < output_lst.size(); i++) {
+                    if (i != 0) {
+                        filtered += output_lst[i] + '\n';
+                    }
+                }
+                filtered = filtered.substr(0, filtered.length() - 1);  // remove last newline character
+                filtered += COMMUNICATION_DELIMiTER;
+                SSL_write(ssl, filtered.c_str(), filtered.size());
+                to_write = "";
+            }
+
+            // Try to read from SSL
             cc = SSL_read(ssl, buf, SOCKET_BUF_SIZE); /* get request */
 
             if (cc == 0) {
                 // Executes if connection is closed gracefully. If closed unexpectedly, it won't be noticed.
                 log_action(client_info, "Close connection");
                 close_ssl_connection();
-                continue;
+                close(ptm);  // Close terminal
+                exit(EXIT_SUCCESS);
             } else if (cc == -1) {
                 if (errno != EAGAIN && errno != EINTR && errno != EWOULDBLOCK) {
-                    log_action(client_info, "Error happened. Description below");
+                    log_action(client_info, "Error happened while reading from SSL");
                     encrypted_cerr_if_needed("recv");
                 }
                 continue;
@@ -169,10 +241,6 @@ void run_encrypted_server(int port) {
         accumulated_value = cmd_list.back();
         cmd_list.pop_back();  // Pop all that is left after the last \n
 
-//        std::cout << "here!" << std::endl;
-
-        ssize_t nbytes;
-        char inbuf[SOCKET_BUF_SIZE];
         for (auto &cur_cmd: cmd_list) {
             if (!is_authentication) {
                 log_action(client_info, cur_cmd);
@@ -184,20 +252,13 @@ void run_encrypted_server(int port) {
                     pipe(read_pfd);
                     pipe(write_pfd);
 
-                    run_external_command(read_pfd, write_pfd, cur_cmd);
-//                    usleep(3'000'000);
-//                    std::cout << "wait over" << std::endl;
-//                    write(write_pfd[ENCRYPTED_PIPE_WRITE], "ls", 2);
-
-                    std::string to_write;
-
-                    /* read from read end of pipe until EOF (return value 0) */
-                    while ((nbytes = read(read_pfd[ENCRYPTED_PIPE_READ], inbuf, SOCKET_BUF_SIZE)) > 0) {
-                        inbuf[nbytes] = '\0';
-                        to_write += inbuf;
-                        to_write += COMMUNICATION_DELIMiTER;
-                        SSL_write(ssl, to_write.c_str(), to_write.size());
-                    }
+                    run_external_command(read_pfd, write_pfd, cur_cmd, devname, &ptm);
+                } else {
+                    int status = 0;
+                    cur_cmd += '\n';
+                    const char* content = cur_cmd.c_str();
+                    write_buffer(ptm, content, cur_cmd.size(), &status);
+                    skip_same_command_output = true;
                 }
 
                 // Write to pipe

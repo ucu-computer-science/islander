@@ -1,11 +1,7 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
-
 #include "../inc/helper_functions.h"
 #include "../inc/cgroup_functions.h"
 
 #define MNT_FREQUENCY 5.0
-
 
 void parse_args(int argc, char** argv, struct process_params *params, resource_limits *res_limits) {
     if (argc < 2) exit(0);
@@ -25,7 +21,6 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
     int vlm_src_idx = 0;
     int vlm_dst_idx = 0;
     for (int i = 1; i < argc; i++) {
-        // cgroup limits
         if (strcmp(argv[i], "--memory-in-bytes") == 0) {
             res_limits->memory_in_bytes = argv[i + 1];
             i++;
@@ -44,10 +39,6 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
         } else if (strcmp(argv[i], "--device-write-bps") == 0) {
             res_limits->device_write_bps = argv[i + 1];
             i++;
-
-        // detached mode feature
-        } else if (strcmp(argv[i], "--detach") == 0 || strcmp(argv[i], "-d") == 0) {
-            params->is_detached = true;
 
         // mount feature
         } else if (strcmp(argv[i], "--mount") == 0) {
@@ -109,14 +100,6 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
 }
 
 
-void set_up_default_params(struct process_params* params) {
-    params->is_detached = false;
-    params->is_mount = false;
-    params->is_volume = false;
-    params->is_tmpfs = false;
-}
-
-
 void enable_features(int isle_pid, struct process_params *params, const char *exec_file_path) {
     if (params->is_mount) mount_feature(isle_pid, params);
     if (params->is_volume) volume_feature(isle_pid, params, exec_file_path);
@@ -128,7 +111,7 @@ void release_resources(int isle_pid, struct process_params *params) {
     if (params->is_mount) unmount_dirs(isle_pid, params);
     if (params->is_volume) unmount_volumes(isle_pid, params);
     if (params->is_tmpfs) unmount_ns_dir(isle_pid, params->tmpfs_dst);
-//    rm_cgroup_dirs(isle_pid);
+    rm_cgroup_dirs(isle_pid);
 
     free(params->argv);
     free(params->mnt_src);
@@ -204,16 +187,15 @@ void write_file(char path[100], char line[100]) {
  * like PID, Name, Time created. */
 void create_islenode(char* isle_name, int isle_pid) {
     // Provide a path for the file that needs to be created
-    char file_name[strlen(ISLENODE_DIR_PATH) + strlen(isle_name) + strlen(ISLENODE_FORMAT) + 1];
-    sprintf(file_name, "%s/%s.%s", ISLENODE_DIR_PATH, isle_name, ISLENODE_FORMAT);
-
+    char file_name[strlen(ISLENODE_DIR_PATH) + strlen(isle_name) + strlen(ISLENODE_FORMAT)];
+    sprintf(file_name, "%s%s%s", ISLENODE_DIR_PATH, isle_name, ISLENODE_FORMAT);
     // Create file.
     FILE* file = fopen(file_name, "w");
     // Get the current timestamp.
     time_t t;
     time(&t);
     char* time = ctime(&t);
-    // Write isle parameters to the associated file separated with \n
+    // Write isle parameters to the associated file separeted with \n
     fprintf(file, "%d\n%s\n%s", isle_pid, isle_name, time);
     fclose(file);
 }

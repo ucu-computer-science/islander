@@ -19,7 +19,6 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <time.h>
-#include <fcntl.h>              /* Definition of O_* constants */
 
 #include "./defined_vars.h"
 
@@ -27,11 +26,8 @@
 struct process_params
 {
     int pipe_fd[PIPE_FD_NUM];
-    int sfd; // UNIX socket fd
-//    int log_pipe_fd[PIPE_FD_NUM];
     char **argv;
     int argc;
-    bool is_detached;
 
     // vars for islenode
     char* name;

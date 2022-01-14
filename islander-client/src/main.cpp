@@ -6,6 +6,7 @@
 #include "../inc/options_parser.h"
 #include "../inc/openssl_communication.h"
 #include "../inc/utils.h"
+#include "../inc/wrappers.h"
 
 
 int main(int argc, char *argv[]) {
@@ -14,6 +15,7 @@ int main(int argc, char *argv[]) {
     config.parse(argc, argv);
     int port = config.get_port();
     std::string bin = config.get_bin();
+    std::string address = config.get_address();
 
     if (port == -1) {
         cout << "No port specified. Picking the default one" << endl;
@@ -68,14 +70,7 @@ int main(int argc, char *argv[]) {
     command += mount;
     command += volume;
 
-    // std::cout << command << std::endl;
-
-    // we need to create output object to receive the result
-    std::string command_output_buf;
-
-    run_encrypted_client(port, command, command_output_buf);
-
-    // std::cout << "command_output_buf " << command_output_buf << std::endl;
+    run_encrypted_client(port, address, command);
 
     return 0;
 }

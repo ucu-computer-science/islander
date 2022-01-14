@@ -10,8 +10,8 @@ void run_msh_script(std::string &filename);
 
 void run_command(const std::string &buf);
 
-void run_external_command(int* read_pfd, int* write_pfd, std::string& cmd);
+void run_external_command(int* read_pfd, int* write_pfd, std::string& cmd, char *devname, int* ptm);
 
-void exec_command(int* read_pfd, int* write_pfd, std::string& cmd) ;
+void exec_command(int* read_pfd, int* write_pfd, std::string& cmd, int* pts) ;
 
 #endif //MYSHELL_EXECUTION_FUNCTS_HPP
