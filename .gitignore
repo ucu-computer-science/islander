@@ -2,6 +2,8 @@
 isle/binary
 isle/build
 
+isle/files/s3_secrets.txt
+
 isle/rootfs-alpine-stress
 isle/rootfs-alpine-stress/home/writetest
 isle/rootfs-alpine-stress/tmp/writetest
@@ -14,6 +16,10 @@ isle/ubuntu-rootfs/home/readtest
 isle/ubuntu-rootfs/tmp/readtest
 
 files/.OS_project_IAM_user
+
+remote-vlm-manager/az_terraform/
+remote-vlm-manager/s3_terraform/
+
 
 ### C++ ###
 # Prerequisites

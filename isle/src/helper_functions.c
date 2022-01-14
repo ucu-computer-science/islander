@@ -45,6 +45,19 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
             res_limits->device_write_bps = argv[i + 1];
             i++;
 
+        // remote volumes feature
+        } else if (strcmp(argv[i], "--mount-aws") == 0) {
+            params->remote_vlm.is_mount_aws = true;
+            params->remote_vlm.mnt_aws_src = argv[i + 2];
+            params->remote_vlm.mnt_aws_dst = argv[i + 4];
+            i += 4;
+
+        } else if (strcmp(argv[i], "--mount-az") == 0) {
+            params->remote_vlm.is_mount_az = true;
+            params->remote_vlm.mnt_az_src = argv[i + 2];
+            params->remote_vlm.mnt_az_dst = argv[i + 4];
+            i += 4;
+
         // detached mode feature
         } else if (strcmp(argv[i], "--detach") == 0 || strcmp(argv[i], "-d") == 0) {
             params->is_detached = true;
@@ -121,6 +134,10 @@ void enable_features(int isle_pid, struct process_params *params, const char *ex
     if (params->is_mount) mount_feature(isle_pid, params);
     if (params->is_volume) volume_feature(isle_pid, params, exec_file_path);
     if (params->is_tmpfs) mount_ns_tmpfs(isle_pid, params);
+    if (params->remote_vlm.is_mount_aws) mount_s3_bucket(isle_pid, params->remote_vlm.mnt_aws_src,
+                                                         params->remote_vlm.mnt_aws_dst, exec_file_path);
+    if (params->remote_vlm.is_mount_az) mount_az_storage_container(isle_pid, params->remote_vlm.mnt_az_src,
+                                                                    params->remote_vlm.mnt_az_dst, exec_file_path);
 }
 
 
@@ -128,6 +145,9 @@ void release_resources(int isle_pid, struct process_params *params) {
     if (params->is_mount) unmount_dirs(isle_pid, params);
     if (params->is_volume) unmount_volumes(isle_pid, params);
     if (params->is_tmpfs) unmount_ns_dir(isle_pid, params->tmpfs_dst);
+    if (params->remote_vlm.is_mount_aws) umount_cloud_dir(isle_pid, params->remote_vlm.mnt_aws_dst);
+    if (params->remote_vlm.is_mount_az) umount_cloud_dir(isle_pid, params->remote_vlm.mnt_az_dst);
+
 //    rm_cgroup_dirs(isle_pid);
 
     free(params->argv);
@@ -135,6 +155,126 @@ void release_resources(int isle_pid, struct process_params *params) {
     free(params->mnt_dst);
     free(params->vlm_src);
     free(params->vlm_dst);
+}
+
+
+// Function source -- https://www.techiedelight.com/implement-substr-function-c/
+// Following function extracts characters present in `src`
+// between `m` and `n` (excluding `n`)
+char* substr(const char *src, int m, int n) {
+    // get the length of the destination string
+    int len = n - m;
+
+    // allocate (len + 1) chars for destination (+1 for extra null character)
+    char *dest = (char*)malloc(sizeof(char) * (len + 1));
+
+    // start with m'th char and copy `len` chars into the destination
+    strncpy(dest, (src + m), len);
+
+    // return the destination string
+    return dest;
+}
+
+
+char* get_username() {
+    const char *exec_path;
+    char cwd[MAX_PATH_LENGTH];
+    getcwd(cwd, MAX_PATH_LENGTH);
+    exec_path = cwd;
+
+    // get substring with user host path
+    uint count = 0;
+    uint substr_start = 0;
+    uint substr_end = strlen(exec_path);
+    for (uint i = 0; i < strlen(exec_path); i++) {
+        if (exec_path[i] == '/') {
+            count++;
+            if (count == 2) {
+                substr_start = i + 1;
+            } else if (count == 3) {
+                substr_end = i;
+                break;
+            }
+        }
+    }
+    return substr(exec_path, substr_start, substr_end);
+}
+
+
+void get_islander_home(char *islander_home_path, const char *exec_file_path) {
+    const char *exec_path;
+    char user_home_path[MAX_PATH_LENGTH];
+
+    // here we find use home path as where islander is located by default.
+    // For example, /home/username/
+    if (exec_file_path[0] == '/') {
+        // set exec_path to exec_file_path to use exec_path for getting substring with user host path,
+        // in case we run islander_engine binary with full path to it, for ex., from /var/lib directory
+        exec_path = exec_file_path;
+    }
+    else {
+        // set exec_path to current working dir to use exec_path for getting substring with user host path,
+        // in case we run islander_engine binary with relative path to it
+        char cwd[MAX_PATH_LENGTH];
+        getcwd(cwd, MAX_PATH_LENGTH);
+        exec_path = cwd;
+    }
+
+    // get substring with user host path
+    uint count = 0;
+    uint substr_len = 0;
+    for (uint i = 0; i < strlen(exec_path); i++) {
+        if (exec_path[i] == '/') {
+            if (++count == 3) {
+                substr_len = i + 1;
+                break;
+            }
+        }
+    }
+    strncpy(user_home_path, exec_path, substr_len);
+    user_home_path[substr_len] = '\0';
+
+    // make concatenations
+    char *str_arr[] = {user_home_path, ISLANDER_HOME_PREFIX};
+    char islander_home_path2[MAX_PATH_LENGTH];
+    islander_home_path2[0] = '\0';
+    str_array_concat(islander_home_path2, str_arr, 2);
+    strcpy(islander_home_path, islander_home_path2);
+}
+
+
+void get_aws_secrets_path(char *aws_secrets_path, const char *exec_file_path) {
+    char islander_home_path[MAX_PATH_LENGTH];
+    get_islander_home(islander_home_path, exec_file_path);
+
+    char *secrets_prefix = SECRETS_PREFIX;
+    char *aws_secrets_name = AWS_SECRETS_NAME;
+    sprintf(aws_secrets_path, "%s%s%s", islander_home_path, secrets_prefix, aws_secrets_name);
+}
+
+
+void get_az_secrets_path(char *az_secrets_path, const char *exec_file_path) {
+    char islander_home_path[MAX_PATH_LENGTH];
+    get_islander_home(islander_home_path, exec_file_path);
+
+    char *secrets_prefix = SECRETS_PREFIX;
+    char *aws_secrets_name = AZ_SECRETS_NAME;
+    sprintf(az_secrets_path, "%s%s%s", islander_home_path, secrets_prefix, aws_secrets_name);
+}
+
+
+void exec_bash_cmd(char *cmd) {
+    FILE *p;
+    int ch;
+
+    p = popen(cmd,"r");
+    if (p == NULL) {
+        puts("Unable to open process");
+        return;
+    }
+    while( (ch=fgetc(p)) != EOF)
+        putchar(ch);
+    pclose(p);
 }
 
 
@@ -188,6 +328,14 @@ void create_dir(char* subsystem_path) {
 }
 
 
+void remove_file(char *file_path) {
+    if (remove(file_path) == 0)
+        printf("Deleted successfully\n");
+    else
+        printf("Unable to delete the file\n");
+}
+
+
 void write_file(char path[100], char line[100]) {
     FILE *f = fopen(path, "w");
 
@@ -202,10 +350,16 @@ void write_file(char path[100], char line[100]) {
 
 /** Create file that contains information about the isle itself
  * like PID, Name, Time created. */
-void create_islenode(char* isle_name, int isle_pid) {
+void create_islenode(char* isle_name, int isle_pid, char *exec_file_path) {
+    char islander_home_path[MAX_PATH_LENGTH];
+    get_islander_home(islander_home_path, exec_file_path);
+
+    char full_islenodes_path[MAX_PATH_LENGTH + 32];
+    sprintf(full_islenodes_path, "%s%s", islander_home_path, ISLENODE_DIR_PATH);
+
     // Provide a path for the file that needs to be created
-    char file_name[strlen(ISLENODE_DIR_PATH) + strlen(isle_name) + strlen(ISLENODE_FORMAT) + 1];
-    sprintf(file_name, "%s/%s.%s", ISLENODE_DIR_PATH, isle_name, ISLENODE_FORMAT);
+    char file_name[strlen(full_islenodes_path) + strlen(isle_name) + strlen(ISLENODE_FORMAT) + 1];
+    sprintf(file_name, "%s%s.%s", full_islenodes_path, isle_name, ISLENODE_FORMAT);
 
     // Create file.
     FILE* file = fopen(file_name, "w");

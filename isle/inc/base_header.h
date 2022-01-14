@@ -24,6 +24,18 @@
 #include "./defined_vars.h"
 
 
+typedef struct
+{
+    bool is_mount_aws;
+    char *mnt_aws_src;
+    char *mnt_aws_dst;
+
+    bool is_mount_az;
+    char *mnt_az_src;
+    char *mnt_az_dst;
+} remote_volumes;
+
+
 struct process_params
 {
     int pipe_fd[PIPE_FD_NUM];
@@ -32,6 +44,7 @@ struct process_params
     char **argv;
     int argc;
     bool is_detached;
+    remote_volumes remote_vlm;
 
     // vars for islenode
     char* name;
@@ -58,6 +71,7 @@ struct process_params
     bool has_netns;
 };
 
+
 typedef struct
 {
     char* memory_in_bytes;
@@ -67,6 +81,5 @@ typedef struct
     char* device_read_bps;
     char* device_write_bps;
 } resource_limits;
-
 
 #endif //NAMESPACES_BASE_HEADER_H

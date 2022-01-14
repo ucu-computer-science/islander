@@ -23,7 +23,7 @@ void unmount_volumes(int isle_pid, struct process_params *params) {
 
 /** Mount subvolume src_vlm_name into dest_vlm_path **/
 void mount_ns_volume(int isle_pid, char* src_vlm_name, char* dest_vlm_path, const char *exec_file_path) {
-    char user_home_path[256];
+    char user_home_path[MAX_PATH_LENGTH];
     const char *exec_path;
 
     // here we find use home path as where islander is located by default.
@@ -36,8 +36,8 @@ void mount_ns_volume(int isle_pid, char* src_vlm_name, char* dest_vlm_path, cons
     else {
         // set exec_path to current working dir to use exec_path for getting substring with user host path,
         // in case we run islander_engine binary with relative path to it
-        char cwd[256];
-        getcwd(cwd, 256);
+        char cwd[MAX_PATH_LENGTH];
+        getcwd(cwd, MAX_PATH_LENGTH);
         exec_path = cwd;
     }
 
@@ -57,13 +57,13 @@ void mount_ns_volume(int isle_pid, char* src_vlm_name, char* dest_vlm_path, cons
 
     // make concatenations
     char *str_arr[] = {user_home_path, SRC_VOLUMES_PATH, src_vlm_name};
-    char abs_vlm_path[256];
+    char abs_vlm_path[MAX_PATH_LENGTH];
     abs_vlm_path[0] = '\0';
     str_array_concat(abs_vlm_path, str_arr, 3);
 
     // create subvolume with src_vlm_name name
     char *str_arr2[] = {"btrfs subvolume create ", abs_vlm_path, "> /dev/null 2>&1"};
-    char btrfs_cmd[256];
+    char btrfs_cmd[MAX_PATH_LENGTH];
     btrfs_cmd[0] = '\0';
     str_array_concat(btrfs_cmd, str_arr2, 3);
 
@@ -72,7 +72,7 @@ void mount_ns_volume(int isle_pid, char* src_vlm_name, char* dest_vlm_path, cons
 
     // give permission for thw process to make read, write and execute modes for subvolume
     char *str_arr3[] = {"sudo chmod 770 ", abs_vlm_path, " > /dev/null 2>&1"};
-    char chmod_cmd[256];
+    char chmod_cmd[MAX_PATH_LENGTH];
     chmod_cmd[0] = '\0';
     str_array_concat(chmod_cmd, str_arr3, 3);
 
@@ -106,11 +106,11 @@ void fork_vlm_mount(int isle_pid, char* src_vlm_name, char* dest_dir_path) {
         char victim_name[] = "nsenter";
 
         char *str_arr[] = {"subvol=", src_vlm_name};
-        char subvolume[256];
+        char subvolume[MAX_PATH_LENGTH];
         subvolume[0] = '\0';
         str_array_concat(subvolume, str_arr, 2);
 
-        char args_arr[NSENTER_VLM_ARGS][256] = {
+        char args_arr[NSENTER_VLM_ARGS][MAX_PATH_LENGTH] = {
                 "-t", "isle_pid_str", "mount",
                 "/dev/nvme0n1p5", "-o", "subvol", "dest_dir_path"
         };
