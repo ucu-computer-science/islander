@@ -29,11 +29,9 @@ void mount_az_storage_container(int isle_pid, char* src_bucket_name, char* dest_
 
     char blobfuse_tmp_path[MAX_PATH_LENGTH + 32];
     sprintf(blobfuse_tmp_path, "%s%s", islander_home_path, AZ_BLOBFUSE_TMP_PATH);
-    printf("blobfuse_tmp_path -- %s\n", blobfuse_tmp_path);
 
     char *az_secrets_path = (char *)malloc(MAX_PATH_LENGTH);
     get_az_secrets_path(az_secrets_path, exec_file_path);
-    printf("az_secrets_path -- %s\n", az_secrets_path);
 
     char blobfuse_tmp_secrets_path[MAX_PATH_LENGTH + 32];
     sprintf(blobfuse_tmp_secrets_path, "%s/%s", islander_home_path, ISLANDER_TEMP_PATH);
@@ -50,15 +48,53 @@ void mount_az_storage_container(int isle_pid, char* src_bucket_name, char* dest_
 
         fclose(fp);
     }
-    printf("file_content -- %s\n", file_content);
 
-//    // in this command we use s3fs to mount s3 bucket to destination dir,
-//    // nonempty option is needed as our bucket, which we want to mount to our fs, can be nonempty;
-//    // also use su USERNAME -c to run command as non-root user, such that is can be accessed from our isle
-//    sprintf(azfs_cmd,
-//            "blobfuse %s --tmp-path=%s --config-file=/home/denys_herasymuk/islander/remote-volumes/cloud_secrets/az_storage_secrets.txt -o allow_other",
-//            dest_bucket_path, blobfuse_tmp_path, src_bucket_name, aws_secrets_path);
-//    system(azfs_cmd);
+    // split by \n
+    char delim[] = "\n";
+    char file_lines[2][MAX_PATH_LENGTH];
+    char file_tokens[4][MAX_PATH_LENGTH];
+
+    uint idx_lines = 0;
+    char *ptr = strtok(file_content, delim);
+    while (ptr != NULL) {
+        printf("'%s'\n", ptr);
+        strcpy(file_lines[idx_lines++], ptr);
+        ptr = strtok(NULL, delim);
+    }
+
+    // split by spaces
+    char delim2[] = " ";
+    uint idx_tokens = 0;
+    for (uint i = 0; i < idx_lines; i++) {
+        ptr = strtok(file_lines[i], delim2);
+        while (ptr != NULL) {
+            printf("'%s'\n", ptr);
+            strcpy(file_tokens[idx_tokens++], ptr);
+            ptr = strtok(NULL, delim);
+        }
+    }
+
+    // setenv
+    setenv("AZURE_STORAGE_ACCOUNT", file_tokens[1], 1);
+    setenv("AZURE_STORAGE_ACCESS_KEY", file_tokens[3], 1);
+
+//     in this command we use s3fs to mount s3 bucket to destination dir,
+//     nonempty option is needed as our bucket, which we want to mount to our fs, can be nonempty;
+//     also use su USERNAME -c to run command as non-root user, such that is can be accessed from our isle
+    sprintf(azfs_cmd,
+            "blobfuse %s --container-name=%s --tmp-path=%s -o allow_other",
+            dest_bucket_path, src_bucket_name, blobfuse_tmp_path);
+    system(azfs_cmd);
+
+#ifdef DEBUG_MODE
+    printf("azfs_cmd -- %s\n", azfs_cmd);
+    printf("blobfuse_tmp_path -- %s\n", blobfuse_tmp_path);
+    printf("az_secrets_path -- %s\n", az_secrets_path);
+    printf("file_tokens[0] -- %s\n", file_tokens[0]);
+    printf("file_tokens[1] -- %s\n", file_tokens[1]);
+    printf("file_tokens[2] -- %s\n", file_tokens[2]);
+    printf("file_tokens[3] -- %s\n", file_tokens[3]);
+#endif
 
     free(az_secrets_path);
 }

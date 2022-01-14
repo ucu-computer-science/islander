@@ -135,8 +135,8 @@ void enable_features(int isle_pid, struct process_params *params, const char *ex
     if (params->is_tmpfs) mount_ns_tmpfs(isle_pid, params);
     if (params->remote_vlm.is_mount_aws) mount_s3_bucket(isle_pid, params->remote_vlm.mnt_aws_src,
                                                          params->remote_vlm.mnt_aws_dst, exec_file_path);
-    if (params->remote_vlm.is_mount_az) mount_az_storage_container(isle_pid, params->remote_vlm.mnt_aws_src,
-                                                                    params->remote_vlm.mnt_aws_dst, exec_file_path);
+    if (params->remote_vlm.is_mount_az) mount_az_storage_container(isle_pid, params->remote_vlm.mnt_az_src,
+                                                                    params->remote_vlm.mnt_az_dst, exec_file_path);
 }
 
 
@@ -144,8 +144,8 @@ void release_resources(int isle_pid, struct process_params *params) {
     if (params->is_mount) unmount_dirs(isle_pid, params);
     if (params->is_volume) unmount_volumes(isle_pid, params);
     if (params->is_tmpfs) unmount_ns_dir(isle_pid, params->tmpfs_dst);
-    if (params->remote_vlm.is_mount_aws ||
-        params->remote_vlm.is_mount_az) umount_cloud_dir(isle_pid, params->remote_vlm.mnt_aws_dst);
+    if (params->remote_vlm.is_mount_aws) umount_cloud_dir(isle_pid, params->remote_vlm.mnt_aws_dst);
+    if (params->remote_vlm.is_mount_az) umount_cloud_dir(isle_pid, params->remote_vlm.mnt_az_dst);
 
 //    rm_cgroup_dirs(isle_pid);
 
