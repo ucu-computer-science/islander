@@ -63,7 +63,7 @@ sudo ./islander_engine /bin/bash --mount-az src os-project-test dst ../ubuntu-ro
 sudo ./islander_engine /bin/bash --mount-az src mycontainer7 dst ../ubuntu-rootfs/s3_bucket/
 
 # set feature of mounting GCP storage bucket
-sudo ./islander_engine /bin/bash --mount-gcp src os-project-test1 dst ../ubuntu-rootfs/s3_bucket/
+sudo ./islander_engine /bin/bash --mount-gcp src os-project-test dst ../ubuntu-rootfs/s3_bucket/
 ```
 
 #### S3 buckets
