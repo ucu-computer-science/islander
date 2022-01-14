@@ -33,6 +33,10 @@ typedef struct
     bool is_mount_az;
     char *mnt_az_src;
     char *mnt_az_dst;
+
+    bool is_mount_gcp;
+    char *mnt_gcp_src;
+    char *mnt_gcp_dst;
 } remote_volumes;
 
 
