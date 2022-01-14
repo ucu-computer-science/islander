@@ -23,19 +23,22 @@ void mount_s3_bucket(int isle_pid, char* src_bucket_name, char* dest_bucket_path
 
 
 void mount_az_storage_container(int isle_pid, char* src_bucket_name, char* dest_bucket_path, const char *exec_file_path) {
-    char azfs_cmd[MAX_PATH_LENGTH];
+    // Get islander home absolute path
     char islander_home_path[MAX_PATH_LENGTH];
     get_islander_home(islander_home_path, exec_file_path);
 
+    // Create temp_path for blobfuse cmd below
     char blobfuse_tmp_path[MAX_PATH_LENGTH + 32];
     sprintf(blobfuse_tmp_path, "%s%s", islander_home_path, AZ_BLOBFUSE_TMP_PATH);
 
+    // Get the path of Azure storage account secrets
     char *az_secrets_path = (char *)malloc(MAX_PATH_LENGTH);
     get_az_secrets_path(az_secrets_path, exec_file_path);
 
     char blobfuse_tmp_secrets_path[MAX_PATH_LENGTH + 32];
     sprintf(blobfuse_tmp_secrets_path, "%s/%s", islander_home_path, ISLANDER_TEMP_PATH);
 
+    // Read content of file with secrets
     char file_content[1000000];
     FILE *fp = fopen(az_secrets_path, "r");
     if (fp != NULL) {
@@ -49,7 +52,7 @@ void mount_az_storage_container(int isle_pid, char* src_bucket_name, char* dest_
         fclose(fp);
     }
 
-    // split by \n
+    // Split file_content by \n
     char delim[] = "\n";
     char file_lines[2][MAX_PATH_LENGTH];
     char file_tokens[4][MAX_PATH_LENGTH];
@@ -57,30 +60,28 @@ void mount_az_storage_container(int isle_pid, char* src_bucket_name, char* dest_
     uint idx_lines = 0;
     char *ptr = strtok(file_content, delim);
     while (ptr != NULL) {
-        printf("'%s'\n", ptr);
         strcpy(file_lines[idx_lines++], ptr);
         ptr = strtok(NULL, delim);
     }
 
-    // split by spaces
+    // Split file_content by spaces
     char delim2[] = " ";
     uint idx_tokens = 0;
     for (uint i = 0; i < idx_lines; i++) {
         ptr = strtok(file_lines[i], delim2);
         while (ptr != NULL) {
-            printf("'%s'\n", ptr);
             strcpy(file_tokens[idx_tokens++], ptr);
             ptr = strtok(NULL, delim);
         }
     }
 
-    // setenv
+    // Setenv to use blobfuse cmd below, to mount azure storage container to local fs
     setenv("AZURE_STORAGE_ACCOUNT", file_tokens[1], 1);
     setenv("AZURE_STORAGE_ACCESS_KEY", file_tokens[3], 1);
 
-//     in this command we use s3fs to mount s3 bucket to destination dir,
-//     nonempty option is needed as our bucket, which we want to mount to our fs, can be nonempty;
-//     also use su USERNAME -c to run command as non-root user, such that is can be accessed from our isle
+    // In this command we use blobfuse to mount az storage container to destination dir.
+    // Also use -o allow_other to allow other users to access it, such that is can be accessed from our isle
+    char azfs_cmd[MAX_PATH_LENGTH + 128];
     sprintf(azfs_cmd,
             "blobfuse %s --container-name=%s --tmp-path=%s -o allow_other",
             dest_bucket_path, src_bucket_name, blobfuse_tmp_path);
