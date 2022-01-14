@@ -28,6 +28,10 @@ void create_gcp_bucket(std::string &user_home_path, std::string &bucket_name) {
 
 /** Use terraform script to delete GCP bucket */
 void delete_gcp_bucket(std::string &user_home_path, std::string &bucket_name) {
+    // Set GOOGLE_APPLICATION_CREDENTIALS to authenticate to GCP account
+    std::string full_gcp_secrets_path = user_home_path + SECRETS_PREFIX + GCP_SECRETS_NAME;
+    setenv("GOOGLE_APPLICATION_CREDENTIALS", full_gcp_secrets_path.c_str(), 1);
+
     std::string gcp_trf_path = GCP_TERRAFORM_PATH;
     std::string trf_scripts_path = user_home_path + gcp_trf_path;
     std::filesystem::current_path(trf_scripts_path);
