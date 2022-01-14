@@ -9,7 +9,10 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 
 #! Project source compilation
-add_executable(ps main.cpp)
+AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/inc HEADERS)
+AUX_SOURCE_DIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/src SOURCES)
+
+add_executable(ps ${SOURCES} ${HEADERS})
 
 #! Add external packages
 target_link_libraries(ps Boost::boost)

@@ -349,12 +349,17 @@ void write_file(char path[100], char line[100]) {
 
 /** Create file that contains information about the isle itself
  * like PID, Name, Time created. */
-void create_islenode(char* isle_name, int isle_pid) {
+void create_islenode(char* isle_name, int isle_pid, char *exec_file_path) {
+    char islander_home_path[MAX_PATH_LENGTH];
+    get_islander_home(islander_home_path, exec_file_path);
+
+    char full_islenodes_path[MAX_PATH_LENGTH + 32];
+    sprintf(full_islenodes_path, "%s%s", islander_home_path, ISLENODE_DIR_PATH);
+
     // Provide a path for the file that needs to be created
-    char file_name[strlen(ISLENODE_DIR_PATH) + strlen(isle_name) + strlen(ISLENODE_FORMAT) + 1];
-//    file_name[0] = '\0';
-    sprintf(file_name, "%s%s%s", ISLENODE_DIR_PATH, isle_name, ISLENODE_FORMAT);
-    printf("file_name -- %s", file_name);
+    char file_name[strlen(full_islenodes_path) + strlen(isle_name) + strlen(ISLENODE_FORMAT) + 1];
+    sprintf(file_name, "%s%s%s", full_islenodes_path, isle_name, ISLENODE_FORMAT);
+    printf("file_name -- %s\n", file_name);
 
     // Create file.
     FILE* file = fopen(file_name, "w");
@@ -362,7 +367,7 @@ void create_islenode(char* isle_name, int isle_pid) {
     time_t t;
     time(&t);
     char* time = ctime(&t);
-    printf("file_name2 -- %s", file_name);
+    printf("file_name2 -- %s\n", file_name);
     // Write isle parameters to the associated file separated with \n
     fprintf(file, "%d\n%s\n%s", isle_pid, isle_name, time);
     fclose(file);
