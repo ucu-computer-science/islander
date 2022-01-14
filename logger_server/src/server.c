@@ -1,13 +1,18 @@
 #include "../inc/server.h"
+#include "../inc/utils.h"
 #include <fcntl.h>
 
-#define LOGGER_FILE_PATH "/home/yaroslav_morozevych/islander/logger/"
 #define LOGGER_FORMAT ".txt"
 #define BUFFER_SIZE 1024
 
 
 /** Run multi-client server, which logs container output */
 int run_server(int argc, char *argv[]) {
+    // Get path to where logs reside
+    char logger_path[BUFFER_SIZE];
+    get_logger_path(logger_path);
+    logger_path[strlen(logger_path)] = '\0';
+
     struct sockaddr_un addr;
 
     // Create a new server socket with domain: AF_UNIX, type: SOCK_STREAM, protocol: 0
@@ -87,21 +92,19 @@ int run_server(int argc, char *argv[]) {
 
                     // concatenate the home path with a filename
                     char path[BUFFER_SIZE];
-                    for(int i = 0; i < strlen(LOGGER_FILE_PATH); i++)
-                        path[i] = LOGGER_FILE_PATH[i];
-                    for(int i = strlen(LOGGER_FILE_PATH), j = 0; i < strlen(LOGGER_FILE_PATH) + strlen(file); i++, j++)
+                    for(int i = 0; i < strlen(logger_path); i++)
+                        path[i] = logger_path[i];
+                    for(int i = strlen(logger_path), j = 0; i < strlen(logger_path) + strlen(file); i++, j++)
                         path[i] = file[j];
-                    for(int i = strlen(LOGGER_FILE_PATH) + strlen(file), j = 0; i < strlen(LOGGER_FILE_PATH) + strlen(file) + 4; i++, j++)
+                    for(int i = strlen(logger_path) + strlen(file), j = 0; i < strlen(logger_path) + strlen(file) + 4; i++, j++)
                         path[i] = LOGGER_FORMAT[j];
-                    path[strlen(LOGGER_FILE_PATH) + strlen(file) + 4] = '\0';
+                    path[strlen(logger_path) + strlen(file) + 4] = '\0';
 
                     // get file file descriptor
                     int fd = open(path, O_WRONLY | O_CREAT);
                     if (fd > 0) out = fd;
                     continue;
                 }
-
-                printf("INFO: ");
                 fflush(stdout);
                 // Then, write those bytes from buf into STDOUT.
                 if (write(out, buf, numRead) != numRead) {

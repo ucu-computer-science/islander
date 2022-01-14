@@ -6,7 +6,7 @@
 build: islander-engine ps delete logger islander-client islander-server
 
 # Create all necessary dirs and install rootfs
-configure: create-home-dir install-rootfs
+configure: create-home-dir install-rootfs install-binaries
 
 # Build 'islander namespaces' project.
 islander-engine:
@@ -45,6 +45,18 @@ install-rootfs:
 	mkdir -p ./isle/ubuntu-rootfs/test_mnt
 	mkdir -p ./isle/ubuntu-rootfs/test_tmpfs
 	mkdir -p ./isle/ubuntu-rootfs/host_dev
+
+
+install-binaries:
+	mkdir -p ./isle/ubuntu-rootfs/project_bin
+	# build & move first sample
+	cmake ./isle/samples/log_time_sample -B ./isle/samples/log_time_sample/build && \
+	cmake --build ./isle/samples/log_time_sample/build
+	mv ./isle/samples/log_time_sample/build/log_time_sample ./isle/ubuntu-rootfs/project_bin/
+	# build & move seconds sample
+	cmake ./isle/samples/hello_sample -B ./isle/samples/hello_sample/build && \
+	cmake --build ./isle/samples/hello_sample/build
+	mv ./isle/samples/hello_sample/build/hello_sample ./isle/ubuntu-rootfs/project_bin/
 
 
 create-home-dir:
