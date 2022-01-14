@@ -105,11 +105,11 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
     printf("Container process PID: %ld\n", (long)child_pid);
 
     // Create islenode file for the isle
-//    if (params.name) {
-//        create_islenode(params.name, child_pid);
-//    } else {
-//        create_islenode("islander", child_pid);
-//    }
+    if (params.name) {
+        create_islenode(params.name, child_pid, exec_file_path);
+    } else {
+        create_islenode("islander", child_pid, exec_file_path);
+    }
 
     // Get the writable end of the pipe.
     int pipe = params.pipe_fd[PIPE_WRITE];
