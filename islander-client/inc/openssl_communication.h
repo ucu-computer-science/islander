@@ -12,7 +12,7 @@
 #include "./base_functions.h"
 #include "./defined_vars.h"
 
-void run_encrypted_client(int port, std::string& message, std::string& command_output_buf);
+void run_encrypted_client(int port, std::string& address, std::string& message);
 
 int is_authorized_user(int server_fd);
 

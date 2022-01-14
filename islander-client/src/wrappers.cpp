@@ -25,11 +25,3 @@ ssize_t recv_wrapper(bool need_encryption, int sockfd, char *buf) {
     }
     return n_bytes;
 }
-
-
-void close_sock_wrapper(bool need_encryption, int fd) {
-    if (need_encryption) {
-        SSL_free(ssl);         /* release connection state */
-    }
-    close(fd);
-}

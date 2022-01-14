@@ -19,6 +19,8 @@ public:
 
     std::string get_bin();
 
+    std::string get_address();
+
     void parse(int ac, char **av);
 
     std::string parse_number_with_unit(std::string& search_param, std::string default_val);
