@@ -22,11 +22,10 @@ For more details we recommend to look in section 3 of RedHat documentation about
 ## Compile Project
 ```shell
 # 1. Create all required folders and install rootfs:
-make install_rootfs
-make create_dirs
+make configure
 
 # 2. Compile all the subprojects at once:
-make
+make build
 ```
 
 ## Container management
