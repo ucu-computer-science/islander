@@ -1,13 +1,30 @@
 #include "../inc/server.h"
+#include "../inc/utils.h"
 #include <fcntl.h>
 
-#define LOGGER_FILE_PATH "/home/yaroslav_morozevych/islander/logger/"
 #define LOGGER_FORMAT ".txt"
 #define BUFFER_SIZE 1024
 
 
 /** Run multi-client server, which logs container output */
 int run_server(int argc, char *argv[]) {
+    // Get path to where logs reside.
+    char home_path[BUFFER_SIZE];
+    get_logger_path(home_path);
+    home_path[strlen(home_path)] = '\0';
+
+    // Get path to the logger files.
+    char loggs_path[BUFFER_SIZE];
+    strcpy(loggs_path, home_path);
+    strcat(loggs_path, LOGGER_DIR_PATH);
+    loggs_path[strlen(loggs_path)] = '\0';
+
+    // Get path to the logger files file descriptors.
+    char log_fds_path[BUFFER_SIZE];
+    strcpy(log_fds_path, home_path);
+    strcat(log_fds_path, LOG_FDS_DIR_PATH);
+    log_fds_path[strlen(log_fds_path)] = '\0';
+
     struct sockaddr_un addr;
 
     // Create a new server socket with domain: AF_UNIX, type: SOCK_STREAM, protocol: 0
@@ -72,7 +89,8 @@ int run_server(int argc, char *argv[]) {
         }
         else if (pid == 0) {
             // Transfer data from connected socket to stdout until EOF */
-            printf("Log process PID: %d\n", getpid());
+            int log_pid = getpid();
+            printf("Log process PID: %d\n", log_pid);
             fflush(stdout);
 
             // Read at most BUF_SIZE bytes from the socket into buf.
@@ -81,33 +99,41 @@ int run_server(int argc, char *argv[]) {
                 if (buf[0] == '@') {
                     // get the filename
                     char file[BUFFER_SIZE];
-                    for (int i=0; i<strlen(buf); i++)
-                        file[i] = buf[i];
-                    file[strlen(buf)] = '\0';
+                    for (int i = 1; i < strlen(buf); i++)
+                        file[i - 1] = buf[i];
+                    file[strlen(buf) - 1] = '\0';
 
                     // concatenate the home path with a filename
                     char path[BUFFER_SIZE];
-                    for(int i = 0; i < strlen(LOGGER_FILE_PATH); i++)
-                        path[i] = LOGGER_FILE_PATH[i];
-                    for(int i = strlen(LOGGER_FILE_PATH), j = 0; i < strlen(LOGGER_FILE_PATH) + strlen(file); i++, j++)
+                    for(int i = 0; i < strlen(home_path); i++)
+                        path[i] = home_path[i];
+                    for(int i = strlen(home_path), j = 0; i < strlen(home_path) + strlen(file); i++, j++)
                         path[i] = file[j];
-                    for(int i = strlen(LOGGER_FILE_PATH) + strlen(file), j = 0; i < strlen(LOGGER_FILE_PATH) + strlen(file) + 4; i++, j++)
+                    for(int i = strlen(home_path) + strlen(file), j = 0; i < strlen(home_path) + strlen(file) + 4; i++, j++)
                         path[i] = LOGGER_FORMAT[j];
-                    path[strlen(LOGGER_FILE_PATH) + strlen(file) + 4] = '\0';
+                    path[strlen(home_path) + strlen(file) + 4] = '\0';
 
-                    // get file file descriptor
+                    // Get file file descriptor.
                     int fd = open(path, O_WRONLY | O_CREAT);
                     if (fd > 0) out = fd;
+
+                    // Create a file for the logger info.
+                    strcat(log_fds_path, file);
+                    strcat(log_fds_path, LOGGER_FORMAT);
+                    // printf("ISL: %s", log_fds_path);
+                    // Write logger info to file.
+                    FILE* f = fopen(log_fds_path, "w");
+                    fprintf(f, "%d\n%d", log_pid, fd);
+                    fclose(f);
                     continue;
                 }
-
-                printf("INFO: ");
                 fflush(stdout);
                 // Then, write those bytes from buf into STDOUT.
                 if (write(out, buf, numRead) != numRead) {
                     fatal("partial/failed write");
                 }
             }
+            if (out > 0 && out != STDOUT_FILENO) close(out);
 
             if (numRead == -1) {
                 errExit("read");

@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 
 #! Project source compilation
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp inc/utils.h src/utils.cpp)
 
 #! Add external packages
 target_link_libraries(${PROJECT_NAME} Boost::boost)

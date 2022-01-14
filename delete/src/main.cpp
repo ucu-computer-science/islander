@@ -1,13 +1,11 @@
-//
-// Created by yaroslav_morozevych on 09.01.22.
-//
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <csignal>
 #include <boost/algorithm/string.hpp>
+#include "../inc/utils.h"
 
-#define ISLENODE_PATH "/home/yaroslav_morozevych/islander/islenodes/"
+
 #define ISLENODE_FORMAT ".txt"
 
 
@@ -31,8 +29,11 @@ int main(int argc, char** argv) {
         std::cout << "Too little arguments. Usage: islander delete <isle-name>\n";
         return 0;
     }
+    std::string path;
+    get_full_islenodes_path(path);
+
     // Get the PID of the isle.
-    std::string isle_name = ISLENODE_PATH + std::string(argv[1]) + ISLENODE_FORMAT;
+    std::string isle_name = path + std::string(argv[1]) + ISLENODE_FORMAT;
     int isle_pid = get_pid(isle_name);
     if (isle_pid == -1) {
         std::cout << "islander delete: Such isle does not exist.\n";
