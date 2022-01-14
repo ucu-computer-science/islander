@@ -42,7 +42,7 @@ void run_encrypted_server(int port) {
     // Initialize the SSL library
     SSL_library_init();
     ctx = InitServerCTX();        /* initialize SSL */
-    char *certificate_location = "./mycert.pem";
+    char *certificate_location = "../islander-server/build/mycert.pem";
     LoadCertificates(ctx, certificate_location, certificate_location); /* load certs */
     socket_desc = OpenListener(port);    /* create server socket */
 

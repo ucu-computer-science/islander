@@ -29,3 +29,8 @@ find_package(OpenSSL)
 include_directories(${OpenSSL_INCLUDE_DIR})
 
 target_link_libraries(${PROJECT_NAME} Boost::program_options ${Readline_LIBRARY} ${OPENSSL_CRYPTO_LIBRARIES} ${OPENSSL_SSL_LIBRARIES})
+
+# bin
+set_target_properties(${PROJECT_NAME}
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)

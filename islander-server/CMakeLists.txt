@@ -69,3 +69,8 @@ if (ENABLE_PVS_STUDIO)
 else ()
 	message(NOTICE "\n Consider using PVS-Studio with -DENABLE_PVS_STUDIO=ON flag or Windows GUI application.\n")
 endif ()
+
+# bin
+set_target_properties(${PROJECT_NAME}
+		PROPERTIES
+		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin)

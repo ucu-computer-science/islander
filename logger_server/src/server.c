@@ -1,4 +1,10 @@
 #include "../inc/server.h"
+#include <fcntl.h>
+
+#define LOGGER_FILE_PATH "/home/yaroslav_morozevych/islander/logger/"
+#define LOGGER_FORMAT ".txt"
+#define BUFFER_SIZE 1024
+
 
 /** Run multi-client server, which logs container output */
 int run_server(int argc, char *argv[]) {
@@ -65,18 +71,40 @@ int run_server(int argc, char *argv[]) {
             exit_gracefully(children_pids, sfd, EXIT_FAILURE, pid_idx);
         }
         else if (pid == 0) {
-            //
             // Transfer data from connected socket to stdout until EOF */
-            //
             printf("Log process PID: %d\n", getpid());
             fflush(stdout);
 
             // Read at most BUF_SIZE bytes from the socket into buf.
+            int out = STDOUT_FILENO;
             while ((numRead = read(cfd, buf, BUF_SIZE)) > 0) {
+                if (buf[0] == '@') {
+                    // get the filename
+                    char file[BUFFER_SIZE];
+                    for (int i=0; i<strlen(buf); i++)
+                        file[i] = buf[i];
+                    file[strlen(buf)] = '\0';
+
+                    // concatenate the home path with a filename
+                    char path[BUFFER_SIZE];
+                    for(int i = 0; i < strlen(LOGGER_FILE_PATH); i++)
+                        path[i] = LOGGER_FILE_PATH[i];
+                    for(int i = strlen(LOGGER_FILE_PATH), j = 0; i < strlen(LOGGER_FILE_PATH) + strlen(file); i++, j++)
+                        path[i] = file[j];
+                    for(int i = strlen(LOGGER_FILE_PATH) + strlen(file), j = 0; i < strlen(LOGGER_FILE_PATH) + strlen(file) + 4; i++, j++)
+                        path[i] = LOGGER_FORMAT[j];
+                    path[strlen(LOGGER_FILE_PATH) + strlen(file) + 4] = '\0';
+
+                    // get file file descriptor
+                    int fd = open(path, O_WRONLY | O_CREAT);
+                    if (fd > 0) out = fd;
+                    continue;
+                }
+
                 printf("INFO: ");
                 fflush(stdout);
                 // Then, write those bytes from buf into STDOUT.
-                if (write(STDOUT_FILENO, buf, numRead) != numRead) {
+                if (write(out, buf, numRead) != numRead) {
                     fatal("partial/failed write");
                 }
             }

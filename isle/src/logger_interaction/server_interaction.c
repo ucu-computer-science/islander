@@ -4,7 +4,7 @@
 #include "../../inc/logger_interaction/server_interaction.h"
 
 
-int connect_to_process_logger() {
+int connect_to_process_logger(char* islename) {
     struct sockaddr_un addr;
 
     // Create a new client socket with domain: AF_UNIX, type: SOCK_STREAM, protocol: 0
@@ -29,5 +29,15 @@ int connect_to_process_logger() {
                 sizeof(struct sockaddr_un)) == -1) {
         errExit("connect");
     }
+
+    // get the islebnode name
+    char buff[1024];
+    sprintf(buff, "@%s", islename);
+    buff[strlen(buff)] = '\0';
+
+    // send the islenode name via socket
+    if (write(sfd, buff, strlen(buff) + 1) != strlen(buff) + 1)
+        perror("fail");
+
     return sfd;
 }
