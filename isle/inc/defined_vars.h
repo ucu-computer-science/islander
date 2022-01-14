@@ -32,7 +32,8 @@
 // Azure
 #define AZ_SECRETS_NAME "az_storage_secrets.txt"
 #define AZ_BLOBFUSE_TMP_PATH "tmp/blobfusetmp"
-
+// GCP
+#define GCP_SECRETS_NAME "gcp_secrets.json"
 
 #define ISLENODE_FORMAT ".txt"
 #define NSENTER_MNT_ARGS 7

@@ -104,6 +104,31 @@ void mount_az_storage_container(int isle_pid, char* src_bucket_name, char* dest_
 }
 
 
+void mount_gcp_bucket(int isle_pid, char* src_bucket_name, char* dest_bucket_path, const char *exec_file_path) {
+    char *islander_home_path = (char *)malloc(MAX_PATH_LENGTH);
+    get_islander_home(islander_home_path, exec_file_path);
+
+    char *gcp_secrets_path = (char *)malloc(MAX_PATH_LENGTH);
+    get_gcp_secrets_path(gcp_secrets_path, exec_file_path);
+
+    char *username = get_username();
+    char gcpfs_cmd[MAX_PATH_LENGTH];
+
+    setenv("GOOGLE_APPLICATION_CREDENTIALS", gcp_secrets_path, 1);
+
+    // in this command we use s3fs to mount s3 bucket to destination dir,
+    // nonempty option is needed as our bucket, which we want to mount to our fs, can be nonempty;
+    // also use su USERNAME -c to run command as non-root user, such that is can be accessed from our isle
+//    sprintf(gcpfs_cmd, "su %s -c \"s3fs %s %s -o nonempty -o passwd_file=%s\"", username, src_bucket_name, dest_bucket_path, aws_secrets_path);
+    sprintf(gcpfs_cmd, "gcsfuse %s %s", src_bucket_name, dest_bucket_path);
+    printf("gcpfs_cmd -- %s\n", gcpfs_cmd);
+    system(gcpfs_cmd);
+
+    free(islander_home_path);
+    free(gcp_secrets_path);
+}
+
+
 /** Unmount mounted from clouds directories located in dest_dir_path **/
 void umount_cloud_dir(int isle_pid, char* dest_dir_path) {
     pid_t pid = fork();

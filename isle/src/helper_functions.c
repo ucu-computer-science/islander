@@ -57,6 +57,12 @@ void parse_args(int argc, char** argv, struct process_params *params, resource_l
             params->remote_vlm.mnt_az_dst = argv[i + 4];
             i += 4;
 
+        } else if (strcmp(argv[i], "--mount-gcp") == 0) {
+            params->remote_vlm.is_mount_gcp = true;
+            params->remote_vlm.mnt_gcp_src = argv[i + 2];
+            params->remote_vlm.mnt_gcp_dst = argv[i + 4];
+            i += 4;
+
         // detached mode feature
         } else if (strcmp(argv[i], "--detach") == 0 || strcmp(argv[i], "-d") == 0) {
             params->is_detached = true;
@@ -137,6 +143,8 @@ void enable_features(int isle_pid, struct process_params *params, const char *ex
                                                          params->remote_vlm.mnt_aws_dst, exec_file_path);
     if (params->remote_vlm.is_mount_az) mount_az_storage_container(isle_pid, params->remote_vlm.mnt_az_src,
                                                                     params->remote_vlm.mnt_az_dst, exec_file_path);
+    if (params->remote_vlm.is_mount_gcp) mount_az_storage_container(isle_pid, params->remote_vlm.mnt_gcp_src,
+                                                                    params->remote_vlm.mnt_gcp_dst, exec_file_path);
 }
 
 
@@ -259,6 +267,16 @@ void get_az_secrets_path(char *az_secrets_path, const char *exec_file_path) {
     char *secrets_prefix = SECRETS_PREFIX;
     char *aws_secrets_name = AZ_SECRETS_NAME;
     sprintf(az_secrets_path, "%s%s%s", islander_home_path, secrets_prefix, aws_secrets_name);
+}
+
+
+void get_gcp_secrets_path(char *gcp_secrets_path, const char *exec_file_path) {
+    char islander_home_path[MAX_PATH_LENGTH];
+    get_islander_home(islander_home_path, exec_file_path);
+
+    char *secrets_prefix = SECRETS_PREFIX;
+    char *gcp_secrets_name = GCP_SECRETS_NAME;
+    sprintf(gcp_secrets_path, "%s%s%s", islander_home_path, secrets_prefix, gcp_secrets_name);
 }
 
 

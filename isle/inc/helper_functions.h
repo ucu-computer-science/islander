@@ -50,6 +50,8 @@ void get_aws_secrets_path(char *aws_secrets_path, const char *exec_file_path);
 
 void get_az_secrets_path(char *az_secrets_path, const char *exec_file_path);
 
+void get_gcp_secrets_path(char *gcp_secrets_path, const char *exec_file_path);
+
 void exec_bash_cmd(char *cmd);
 
 void await_setup(int pipe);
