@@ -114,14 +114,12 @@ void mount_gcp_bucket(int isle_pid, char* src_bucket_name, char* dest_bucket_pat
     char *username = get_username();
     char gcpfs_cmd[MAX_PATH_LENGTH];
 
+    // Set GOOGLE_APPLICATION_CREDENTIALS to authenticate to GCP account
     setenv("GOOGLE_APPLICATION_CREDENTIALS", gcp_secrets_path, 1);
 
-    // in this command we use s3fs to mount s3 bucket to destination dir,
-    // nonempty option is needed as our bucket, which we want to mount to our fs, can be nonempty;
-    // also use su USERNAME -c to run command as non-root user, such that is can be accessed from our isle
-//    sprintf(gcpfs_cmd, "su %s -c \"s3fs %s %s -o nonempty -o passwd_file=%s\"", username, src_bucket_name, dest_bucket_path, aws_secrets_path);
-    sprintf(gcpfs_cmd, "gcsfuse %s %s", src_bucket_name, dest_bucket_path);
-    printf("gcpfs_cmd -- %s\n", gcpfs_cmd);
+    // In this command we use gcsfuse to mount gcp bucket to destination dir.
+    // Also use su USERNAME -c to run command as non-root user, such that is can be accessed from our isle
+    sprintf(gcpfs_cmd, "su %s -c \"gcsfuse %s %s > /dev/null\"", username, src_bucket_name, dest_bucket_path);
     system(gcpfs_cmd);
 
     free(islander_home_path);
