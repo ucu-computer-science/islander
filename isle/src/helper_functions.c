@@ -359,7 +359,6 @@ void create_islenode(char* isle_name, int isle_pid, char *exec_file_path) {
     // Provide a path for the file that needs to be created
     char file_name[strlen(full_islenodes_path) + strlen(isle_name) + strlen(ISLENODE_FORMAT) + 1];
     sprintf(file_name, "%s%s%s", full_islenodes_path, isle_name, ISLENODE_FORMAT);
-    printf("file_name -- %s\n", file_name);
 
     // Create file.
     FILE* file = fopen(file_name, "w");
@@ -367,7 +366,6 @@ void create_islenode(char* isle_name, int isle_pid, char *exec_file_path) {
     time_t t;
     time(&t);
     char* time = ctime(&t);
-    printf("file_name2 -- %s\n", file_name);
     // Write isle parameters to the associated file separated with \n
     fprintf(file, "%d\n%s\n%s", isle_pid, isle_name, time);
     fclose(file);
