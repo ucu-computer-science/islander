@@ -64,3 +64,4 @@ create-home-dir:
 	mkdir -p ~/islander/islenodes
 	mkdir -p ~/islander/logger
 	mkdir -p ~/islander/volumes
+	mkdir -p ~/islander/log_fds
