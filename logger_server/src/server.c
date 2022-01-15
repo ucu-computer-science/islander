@@ -2,6 +2,7 @@
 #include "../inc/utils.h"
 #include <fcntl.h>
 
+
 #define LOGGER_FORMAT ".txt"
 #define BUFFER_SIZE 1024
 
@@ -128,6 +129,7 @@ int run_server(int argc, char *argv[]) {
                     continue;
                 }
                 fflush(stdout);
+
                 // Then, write those bytes from buf into STDOUT.
                 if (write(out, buf, numRead) != numRead) {
                     fatal("partial/failed write");

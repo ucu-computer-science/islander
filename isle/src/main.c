@@ -89,7 +89,7 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
 
     // Get UNIX socket fd. Note that process_logger should be already running.
     if (params.is_detached) {
-        params.sfd = connect_to_process_logger(params.name ? params.name : "isle");
+        params.sfd = connect_to_process_logger(params.name ? params.name : "islander");
     }
 
     // Clone command process.

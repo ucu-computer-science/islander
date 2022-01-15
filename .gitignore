@@ -15,6 +15,7 @@ isle/ubuntu-rootfs/tmp/writetest
 isle/ubuntu-rootfs/home/readtest
 isle/ubuntu-rootfs/tmp/readtest
 
+files
 files/.OS_project_IAM_user
 
 remote-vlm-manager/az_terraform/

@@ -1,3 +1,0 @@
-p (int) dup2((int) open("/dev/pts/0", 1089, 0777), 1)
-p (int) dup2((int) open("/dev/pts/0", 1089, 0777), 2)
-q
