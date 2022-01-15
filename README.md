@@ -1,5 +1,15 @@
 # UCU_OS_Course_Project
 
+## Features
+
+- Namespaces: `Network` `Mount` `UTS` `PID` `User`
+- Cgroups: `blkio` `memory` `cpu` `devices` `net_cls`
+- Container Management: `ps` `delete` `detach` `islenodes`
+- Data Management: `volumes` `btrfs` `tmpfs` `S3 buckets`
+- Daemon: `Daemon Server` `Daemon Client`
+- Logger: `Logger Server` `Logs`
+- Clouds: `terraform scripts`
+
 ## Description
 
 **Islander** is a container engine, analog of Docker. Our container is called **isle** (pronunciation -- [il]), which is based on Linux namespaces and cgroup v1.
