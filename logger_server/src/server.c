@@ -2,6 +2,7 @@
 #include "../inc/utils.h"
 #include <fcntl.h>
 
+
 #define LOGGER_FORMAT ".txt"
 #define BUFFER_SIZE 1024
 
@@ -105,13 +106,13 @@ int run_server(int argc, char *argv[]) {
 
                     // concatenate the home path with a filename
                     char path[BUFFER_SIZE];
-                    for(int i = 0; i < strlen(home_path); i++)
-                        path[i] = home_path[i];
-                    for(int i = strlen(home_path), j = 0; i < strlen(home_path) + strlen(file); i++, j++)
+                    for(int i = 0; i < strlen(loggs_path); i++)
+                        path[i] = loggs_path[i];
+                    for(int i = strlen(loggs_path), j = 0; i < strlen(loggs_path) + strlen(file); i++, j++)
                         path[i] = file[j];
-                    for(int i = strlen(home_path) + strlen(file), j = 0; i < strlen(home_path) + strlen(file) + 4; i++, j++)
+                    for(int i = strlen(loggs_path) + strlen(file), j = 0; i < strlen(loggs_path) + strlen(file) + 4; i++, j++)
                         path[i] = LOGGER_FORMAT[j];
-                    path[strlen(home_path) + strlen(file) + 4] = '\0';
+                    path[strlen(loggs_path) + strlen(file) + 4] = '\0';
 
                     // Get file file descriptor.
                     int fd = open(path, O_WRONLY | O_CREAT);
@@ -128,6 +129,7 @@ int run_server(int argc, char *argv[]) {
                     continue;
                 }
                 fflush(stdout);
+
                 // Then, write those bytes from buf into STDOUT.
                 if (write(out, buf, numRead) != numRead) {
                     fatal("partial/failed write");

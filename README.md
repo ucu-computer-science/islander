@@ -346,7 +346,7 @@ dd if=/host_dev/zero of=/tmp/writetest bs=64k count=1600 conv=fdatasync && rm /t
 ### Useful commands:
 
 * `docker run -ti --rm containerstack/alpine-stress sh`
-* `docker export ec72296fbdde | gzip > alpine-stress.tar.gz` or
+* `docker export ec72296fbdde | gzip > ubuntu-rootfs.tar.gz` or
  `docker export 0d95c058d6ea > alpine-stress.tar.gz`
 * to send SIGKILL to process use:
 ```shell
