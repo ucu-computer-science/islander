@@ -124,7 +124,7 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
     }
 
     // Set up cgroup limits
-//    config_cgroup_limits(child_pid, &res_limits);
+    config_cgroup_limits(child_pid, &res_limits);
 
     // Signal to the command process we're done with setup.
     if (write(pipe, PIPE_OK_MSG, PIPE_MSG_SIZE) != PIPE_MSG_SIZE) {
@@ -145,11 +145,6 @@ void run_main_logic(int argc, char **argv, char *exec_file_path) {
 
 
 int main(int argc, char **argv) {
-//int main() {
-//    int argc = 7;
-//    char *argv[] = {"./islander_engine", "./project_bin/hello_sample", "--mount-aws",
-//                   "bucket", "os-project-test1", "dest", "../ubuntu-rootfs/s3_bucket/"};
-
     printf("PID of islander_engine: %d\n", getpid());
     bool is_detached = false;
     for (int i = 1; i < argc; i++) {

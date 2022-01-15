@@ -11,14 +11,10 @@
 #define PIPE_OK_MSG "OK"
 #define PIPE_MSG_SIZE 2
 
-//#define SRC_ROOTFS_PATH "../isle/ubuntu-rootfs"
 #define SRC_ROOTFS_PATH "../ubuntu-rootfs"
-//#define ISLENODE_DIR_PATH "../isle/islenodes/"
-//#define ISLENODE_DIR_PATH "/home/denys_herasymuk/islander/islenodes/"
 #define ISLENODE_FORMAT "txt"
 #define ISLENODE_DIR_PATH "islenodes/"
 
-//#define SRC_VOLUMES_PATH "/var/lib/islander/volumes/"
 #define SRC_VOLUMES_PATH "islander/volumes/"
 #define ISLANDER_HOME_PREFIX "islander/"
 #define ISLANDER_TEMP_PATH "tmp"

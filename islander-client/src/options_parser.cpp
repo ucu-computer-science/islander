@@ -20,7 +20,6 @@ void command_line_options::parse(int ac, char **av) {
     try {
         po::parsed_options parsed = po::command_line_parser(ac, av).options(opt_conf).run();
         store(parsed, var_map);
-//        filenames = collect_unrecognized(parsed.options, po::include_positional);
         help_flag = var_map.count("help");
         detach_flag = var_map.count("detach");
         netns_flag = var_map.count("netns");

@@ -22,11 +22,6 @@ int main(int argc, char *argv[]) {
         port = DEFAULT_PORT;  // Setting a default port
     }
 
-//    if (bin == "") {
-//        cout << "No path to binary file specified. Use --bin option" << endl;
-//        return FAIL;
-//    }
-
     std::string memory_in_bytes = config.get_memory_in_bytes();
     std::string cpu_shares = config.get_cpu_shares();
     std::string cpu_period = config.get_cpu_period();

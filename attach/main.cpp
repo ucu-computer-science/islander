@@ -10,7 +10,6 @@
 #include <signal.h>
 #include <ctype.h>
 
-//#define ISLENODE_PATH "/home/yaroslav_morozevych/islander/islenodes/"
 #define ISLANDER_HOME_PREFIX "islander/"
 #define ISLENODE_DIR_PATH "islenodes/"
 #define LOG_FDS_DIR_PATH "log_fds/"
@@ -93,8 +92,6 @@ void get_log_process_info(std::string &filepath, log_process_info &log_info) {
     std::vector<std::string> params;
     boost::split(params, str,boost::is_any_of("\n"));
     // Save the params.
-    cout << "params[0] -- " << params[0] << endl;
-    cout << "params[1] -- " << params[1] << endl;
     log_info.log_process_pid = std::stoi(params[0]);
     log_info.log_file_fd  = std::stoi(params[1]);
 }
@@ -107,9 +104,7 @@ void process_attach(int isle_log_process_pid, int log_file_fd, int tty_fd) {
     outfile.close();
 
     char cmd[256];
-//    sprintf(cmd, "gdb -p %d -x gdb_process_attach > /dev/null 2>&1", isle_log_process_pid);
     sprintf(cmd, "gdb -p %d -x gdb_process_attach", isle_log_process_pid);
-    cout << "cmd -- " << cmd << endl;
     system(cmd);
 }
 
@@ -133,11 +128,8 @@ void process_detach(int isle_log_process_pid, int log_file_fd, int tty_fd) {
     outfile.close();
 
     char cmd[256];
-//    sprintf(cmd, "gdb -p %d -x gdb_process_attach > /dev/null 2>&1", isle_log_process_pid);
     sprintf(cmd, "gdb -p %d -x gdb_process_attach", isle_log_process_pid);
-    cout << "cmd -- " << cmd << endl;
     system(cmd);
-//    system("pause");
 }
 
 
@@ -180,35 +172,21 @@ int main(int argc, char** argv) {
     int out_exitStatus;
     std::string tty_name = exec_bash_command(cmd, out_exitStatus);
     tty_name.pop_back();
-    cout << "tty_name -- " << tty_name << endl;
-    cout << "tty_name.size() -- " << tty_name.size() << endl;
 
     tty_name = "/dev/pts/6";
     int tty_fd = open(tty_name.c_str(), 1089, 0777);
-    cout << "tty_fd -- " << tty_fd << endl;
-
-//    // Get the PID of the isle.
-//    std::string isle_name = full_islenodes_path + std::string(argv[1]) + ISLENODE_FORMAT;
-//    int isle_pid = get_pid(isle_name);
-//    if (isle_pid == -1) {
-//        std::cout << "islander attach: Such isle does not exist.\n";
-//        return 0;
-//    }
-//    cout << "isle pid: " << isle_pid << endl;
 
     // get log_process info
     std::string full_log_fds_path;
     get_full_log_fds_path(full_log_fds_path);
     std::string log_file_path = full_log_fds_path + std::string(argv[1]) + ISLENODE_FORMAT;
-    cout << "log_file_path -- " << log_file_path << endl;
 
     log_process_info log_info;
     get_log_process_info(log_file_path, log_info);
 
     // attach to process with gdb
     process_attach(log_info.log_process_pid, log_info.log_file_fd, tty_fd);
-//    process_detach(log_info.log_process_pid, log_info.log_file_fd, tty_fd);
 
-//    close(tty_fd);
+    close(tty_fd);
     return 0;
 }
