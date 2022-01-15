@@ -14,10 +14,16 @@ public:
     ~command_line_options() = default;
 
     [[nodiscard]] bool get_help_flag() const { return help_flag; };
+    [[nodiscard]] bool get_detach_flag() const { return detach_flag; };
+    [[nodiscard]] bool get_ps_flag() const { return ps_flag; };
+    [[nodiscard]] bool get_netns_flag() const { return netns_flag; };
 
     int get_port();
 
     std::string get_bin();
+    std::string get_name();
+    std::string get_delete();
+    std::string get_attach();
 
     std::string get_address();
 
@@ -34,10 +40,13 @@ public:
     std::string get_cpu_quota();
     std::string get_mount();
     std::string get_volume();
-
+    std::string parse_tmpfs();
 
 private:
     bool help_flag = false;
+    bool detach_flag = false;
+    bool ps_flag = false;
+    bool netns_flag = false;
 
     void init_opt_description();
 

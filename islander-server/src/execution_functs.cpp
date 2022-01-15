@@ -46,14 +46,29 @@ void run_external_command(int* read_pfd, int* write_pfd, std::string& cmd, char 
 
 void exec_command(int* read_pfd, int* write_pfd, std::string& cmd, int* pts) {
     // We are the child
-    static char* engine_path = "../isle/build";
-    chdir(engine_path);
-    // Add dot to PATH
-    std::string command =  "./islander_engine";  //
-    std::string victim_name(command);
+
 
     std::vector<std::string> args;
     boost::split(args, cmd, boost::is_any_of(" "));
+
+    std::string command;
+    static char* engine_path;
+    if (args[0] == "ps") {
+        command =  "./ps";
+        engine_path = "../bin";
+        chdir(engine_path);
+        args.erase(args.begin());
+    } else if (args[0] == "delete") {
+        command =  "./delete";
+        engine_path = "../bin";
+        chdir(engine_path);
+        args.erase(args.begin());
+    } else {
+        command =  "./islander_engine";
+        engine_path = "../isle/build";
+        chdir(engine_path);
+    }
+    std::string victim_name(command);
 
     args.insert(args.begin(), victim_name); // Zero argument should be program name
 

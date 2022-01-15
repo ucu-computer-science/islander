@@ -40,8 +40,9 @@ islander-server:
 
 # Unzip the rootfs directory and place it to where it should be.
 install-rootfs:
+	sudo apt install xz-utils
 	mkdir -p ./isle/ubuntu-rootfs
-	tar -xvzf ./isle/files/ubuntu-rootfs.tar.gz -C ./isle/ubuntu-rootfs
+	tar -xf ./isle/files/ubuntu-rootfs.tar.xz -C ./isle
 	mkdir -p ./isle/ubuntu-rootfs/test_mnt
 	mkdir -p ./isle/ubuntu-rootfs/test_tmpfs
 	mkdir -p ./isle/ubuntu-rootfs/host_dev

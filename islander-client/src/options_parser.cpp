@@ -1,11 +1,14 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-#include <filesystem>
 #include "../inc/options_parser.h"
 #include "../inc/exceptions/parser_exeption.h"
 #include "../inc/defined_vars.h"
 #include "../inc/utils.h"
+
+#include <boost/uuid/uuid.hpp>            // uuid class
+#include <boost/uuid/uuid_generators.hpp> // generators
+#include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 
 namespace po = boost::program_options;
 
@@ -19,6 +22,9 @@ void command_line_options::parse(int ac, char **av) {
         store(parsed, var_map);
 //        filenames = collect_unrecognized(parsed.options, po::include_positional);
         help_flag = var_map.count("help");
+        detach_flag = var_map.count("detach");
+        netns_flag = var_map.count("netns");
+        ps_flag = var_map.count("ps");
         notify(var_map);
     } catch (std::exception &E) {
         std::cerr << E.what() << std::endl;
@@ -52,6 +58,33 @@ std::string command_line_options::get_bin() {
     return "";
 }
 
+std::string command_line_options::get_name() {
+    if (var_map.find("name") != var_map.end()) {
+        std::string string_val = var_map["name"].as<std::string>();
+        // Need to do check if not duplicated
+        return string_val;
+    }
+
+    boost::uuids::uuid uuid = boost::uuids::random_generator()();
+    return boost::lexical_cast<std::string>(uuid);
+}
+
+std::string command_line_options::get_delete() {
+    if (var_map.find("delete") != var_map.end()) {
+        std::string string_val = var_map["delete"].as<std::string>();
+        return string_val;
+    }
+    return "";
+}
+
+std::string command_line_options::get_attach() {
+    if (var_map.find("attach") != var_map.end()) {
+        std::string string_val = var_map["attach"].as<std::string>();
+        return string_val;
+    }
+    return "";
+}
+
 std::string command_line_options::get_address() {
     if (var_map.find("address") != var_map.end()) {
         std::string string_val = var_map["address"].as<std::string>();
@@ -60,34 +93,38 @@ std::string command_line_options::get_address() {
     return "127.0.0.1";
 }
 
+std::string parse_unit_number_helper(std::string& string_val) {
+    std::string unit;
+    unit += toupper(string_val.back());
+    std::string number = string_val.substr(0, string_val.size()-1);
+
+    // Check number
+    if (!is_number(number)) {
+        std::cout << "Provided " << string_val << " param is not a number!" << std::endl;
+        return TYPE_ERROR;
+    }
+
+    // Check unit
+    std::map<std::string, int> unit_map = {
+            {"B", 1},
+            {"K", 1'000},
+            {"M", 1'000'000},
+            {"G", 1'000'000'000},
+    };
+
+    if (unit_map.find(unit) == unit_map.end()) {
+        std::cout << "Provided " << string_val << " unit is not any of b, k, m, or g!" << std::endl;
+        return WRONG_UNIT;
+    }
+
+    return string_val;
+}
 
 std::string command_line_options::parse_number_with_unit(std::string& search_param, std::string default_val) {
     if (var_map.find(search_param) != var_map.end()) {
         std::string string_val = var_map[search_param].as<std::string>();
-        std::string unit;
-        unit += toupper(string_val.back());
-        std::string number = string_val.substr(0, string_val.size()-1);
 
-        // Check number
-        if (!is_number(number)) {
-            std::cout << "Provided " << search_param << " param is not a number!" << std::endl;
-            return TYPE_ERROR;
-        }
-
-        // Check unit
-        std::map<std::string, int> unit_map = {
-                {"B", 1},
-                {"K", 1'000},
-                {"M", 1'000'000},
-                {"G", 1'000'000'000},
-        };
-
-        if (unit_map.find(unit) == unit_map.end()) {
-            std::cout << "Provided " << search_param << " unit is not any of b, k, m, or g!" << std::endl;
-            return WRONG_UNIT;
-        }
-
-        return string_val;
+        return parse_unit_number_helper(string_val);
     }
     return default_val;
 }
@@ -172,7 +209,39 @@ std::string command_line_options::get_volume() {
     return parse_vector_param(param);
 }
 
+std::string command_line_options::parse_tmpfs() {
+    std::string search_param = "tmpfs";
+    std::string validated_command = " ";
+    if (var_map.find(search_param) != var_map.end()) {
+        std::vector<std::string> values = var_map[search_param].as<std::vector<std::string>>();
+
+        if (values.size() != 3) {
+            std::cout << "Wrong number of parameters for tmpfs option. It should be equal to three. "
+                         "Please specify dst size nr_inodes. Example: tmpfs ./test_tmpfs/ 2G 1k" << std::endl;
+            return WRONG_ARGUMENTS;
+        }
+
+        std::vector<std::string> param_names = {"dst", "size", "nr_inodes"};
+        for (int i = 0; i < values.size(); i++) {
+            validated_command += " --" + param_names[i] + " ";
+            if (i == 0) {
+                validated_command += values[i];
+            } else {
+                std::string parsed_param = parse_unit_number_helper(values[i]);
+                if (parsed_param == TYPE_ERROR || parsed_param == WRONG_UNIT) {
+                    return WRONG_ARGUMENTS;
+                }
+                validated_command += values[i];
+            }
+        }
+
+        return validated_command;
+    }
+    return "";
+}
+
 void command_line_options::init_opt_description() {
+    // General configs
     opt_conf.add_options()
         ("help,h", "Show help message");
     opt_conf.add_options()
@@ -181,6 +250,8 @@ void command_line_options::init_opt_description() {
             ("port", po::value<std::string>(), "Set server port");
     opt_conf.add_options()
             ("bin", po::value<std::string>(), "Set binary path");
+    opt_conf.add_options()
+            ("name", po::value<std::string>(), "Set container name");
 
     // Limit configs
     opt_conf.add_options()
@@ -197,7 +268,27 @@ void command_line_options::init_opt_description() {
     opt_conf.add_options()
             ("device-write-bps", po::value<std::string>(), "Set device-write-bps");
 
-    // Other configs
+    // ps configs
+    opt_conf.add_options()
+            ("ps", "View the list of active containers");
+    opt_conf.add_options()
+            ("delete", po::value<std::string>(), "Stop and delete container name");
+
+    // network config
+    opt_conf.add_options()
+            ("netns", "Turn on Internet connectivity in the container");
+
+    // attach configs
+    opt_conf.add_options()
+            ("detach,d", "Launch in detach mode");
+    opt_conf.add_options()
+            ("attach", po::value<std::string>(), "Attach to container by its name");
+
+    // tmpfs mount config
+    opt_conf.add_options()
+            ("tmpfs", po::value<std::vector<std::string>>()->multitoken(), "Set tmpfs mount configs");
+
+    // volume configs
     opt_conf.add_options()
             ("mount", po::value<std::vector<std::string>>()->multitoken(), "Set mount");
     opt_conf.add_options()

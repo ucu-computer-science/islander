@@ -22,10 +22,10 @@ int main(int argc, char *argv[]) {
         port = DEFAULT_PORT;  // Setting a default port
     }
 
-    if (bin == "") {
-        cout << "No path to binary file specified. Use --bin option" << endl;
-        return FAIL;
-    }
+//    if (bin == "") {
+//        cout << "No path to binary file specified. Use --bin option" << endl;
+//        return FAIL;
+//    }
 
     std::string memory_in_bytes = config.get_memory_in_bytes();
     std::string cpu_shares = config.get_cpu_shares();
@@ -37,6 +37,14 @@ int main(int argc, char *argv[]) {
     std::string mount = config.get_mount();
     std::string volume = config.get_volume();
 
+    std::string name = config.get_name();
+    bool ps_flag = config.get_ps_flag();
+    bool netns = config.get_netns_flag();
+    std::string delete_val = config.get_delete();
+    bool detach_flag = config.get_detach_flag();
+    std::string attach = config.get_attach();
+    std::string tmpfs = config.parse_tmpfs();
+
     std::vector<std::string> options = {
         memory_in_bytes,
         cpu_shares,
@@ -45,7 +53,11 @@ int main(int argc, char *argv[]) {
         device_read_bps,
         device_write_bps,
         mount,
-        volume
+        volume,
+        name,
+        delete_val,
+        attach,
+        tmpfs
     };
 
     std::vector<std::string> errors = {
@@ -67,8 +79,29 @@ int main(int argc, char *argv[]) {
     command += " --cpu-quota " + cpu_quota;
     command += " --device-read-bps " + device_read_bps;
     command += " --device-write-bps " + device_write_bps;
+    command += " --name " + name;
     command += mount;
     command += volume;
+
+    if (netns) {
+        command += " --netns True";
+    }
+
+    if (detach_flag) {
+        command += " -d";
+    }
+
+    if (!tmpfs.empty()) {
+        command += " --tmpfs " + tmpfs;
+    }
+
+    if (!delete_val.empty()) {
+        command = "delete " + delete_val;
+    } else if (ps_flag) {
+        command = "ps";
+    } else if (!attach.empty()) {
+        command = "attach " + attach;
+    }
 
     run_encrypted_client(port, address, command);
 
