@@ -378,6 +378,10 @@ user	0m 0.00s
 sys	0m 0.17s
 ```
 
+## References
+
+- Network Namespace. [josephmuia.ca](https://josephmuia.ca/2018-05-16-net-namespaces-veth-nat/)
+- Linux Namespaces. [habr.com](https://habr.com/ru/company/selectel/blog/303190/)
 
 
 
