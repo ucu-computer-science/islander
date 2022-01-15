@@ -157,7 +157,7 @@ void release_resources(int isle_pid, struct process_params *params) {
     if (params->remote_vlm.is_mount_az) umount_cloud_dir(isle_pid, params->remote_vlm.mnt_az_dst);
     if (params->remote_vlm.is_mount_gcp) umount_cloud_dir(isle_pid, params->remote_vlm.mnt_gcp_dst);
 
-//    rm_cgroup_dirs(isle_pid);
+    rm_cgroup_dirs(isle_pid);
 
     free(params->argv);
     free(params->mnt_src);

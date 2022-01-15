@@ -4,6 +4,8 @@
 
 **Islander** is a container engine, analog of Docker. Our container is called **isle** (pronunciation -- [il]), which is based on Linux namespaces and cgroup v1.
 
+Full demo of remote volumes with AWS, Azure and GCP you can find here -- [https://youtu.be/IjaCSn4vsO0](https://youtu.be/IjaCSn4vsO0)
+
 
 ### Description of limit options
 
