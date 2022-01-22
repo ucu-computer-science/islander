@@ -1,4 +1,4 @@
-# UCU_OS_Course_Project
+# Islander. The analogue of Docker.
 
 ## Features
 
