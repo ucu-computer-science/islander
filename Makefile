@@ -66,3 +66,6 @@ create-home-dir:
 	mkdir -p ~/islander/logger
 	mkdir -p ~/islander/volumes
 	mkdir -p ~/islander/log_fds
+	mkdir -p ~/islander/remote-volumes
+	mkdir -p ~/islander/remote-volumes/cloud_secrets
+	cp -r ./remote-vlm-manager/terraform/* ~/islander/remote-volumes

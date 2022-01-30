@@ -33,6 +33,8 @@ For more details we recommend to look in section 3 of RedHat documentation about
 
 
 ## Compile Project
+
+1) Set up environment
 ```shell
 # 1. Create all required folders and install rootfs:
 make configure
@@ -40,6 +42,23 @@ make configure
 # 2. Compile all the subprojects at once:
 make build
 ```
+
+2) Create files with credentials in case you want to use remote volumes
+* how to create ~/islander/remote-volumes/gcp_secrets.json described [here](https://cloud.google.com/iam/docs/creating-managing-service-account-keys)
+
+* to create ~/islander/remote-volumes/s3_secrets.txt use the next pattern:
+```text
+<access_key_id>:<secret_access_key>
+```
+
+* to create ~/islander/remote-volumes/az_secrets.txt use the next pattern:
+```text
+AZURE_STORAGE_ACCOUNT=myaccountname
+AZURE_STORAGE_ACCESS_KEY=myaccountkey
+```
+
+For more details look at [this README, Usage/Mounting section](https://github.com/Azure/azure-storage-fuse)
+
 
 ## Container management
 
@@ -57,6 +76,20 @@ sudo ./islander_engine ./project_bin/log_time_sample -d
 # attach to process and redirect stdout and stderr in special tty (change tty for your needs)
 sudo gdb -p 70235 -x process_attach
 ```
+
+Actually, idea how to create attach is correct and defined above. However, we have no enough time to finish it. The base structure of the solution defined in `./attach` directory. 
+
+**Idea of the solution** is the next:
+* implement detached mode (already done).
+
+* create logger server to save stdout and stderr of the container to external file outside of the container. Note that we need to create a logger server to save output into an external file, since we use mount namespace for our container and it can not see anything outside of ubuntu-rootfs, which we mounted as a defaul fs. If you want to get any file on your host fs, you can not do it from the container. Hence, we created a logger instance, which get stdout and stderr of the container via pipe and save in target files. This step is already implemented.
+
+* use gdb to attach to container via its PID and redirect its stdout and stderr into your tty with dup2 syscall or just redirect back into 1 and 2 file descriptors, since in detached container stdout and stderr write to descriptors of logger pipe. For more detailes explore [the next page](https://www.baeldung.com/linux/redirect-output-of-running-process)
+    * for this step you also need to know numbers of file descriptors, in which stdout and stderr of containers were redirected, to redirect these numbers to 1 and 2, or just into fd of target tty. For this you can use communication between logger server and target container.
+
+
+* with above logic you can attach and see stdout and stderr of a previously detached container. To return again to detached container you need to use the same idea with gdb, but partly reverted. However, to implement attach also for stdin, including dynamic stdin, as in bash, you need to develop the same logic, which we created for client-server communication for dynamic commands like bash or gcc. Deep dive into our code of `./islander-client` and `./islander-server` and also watch our final presentation to understand the main architecture of workflow with dynamic commands.
+
 
 ## Manage data
 
